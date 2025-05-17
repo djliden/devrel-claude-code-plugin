@@ -387,6 +387,7 @@ dependencies = [
     { name = "click", version = "8.2.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "llama-index" },
     { name = "mistune" },
+    { name = "patch" },
     { name = "textual" },
 ]
 
@@ -395,6 +396,7 @@ requires-dist = [
     { name = "click", specifier = ">=8.1.7" },
     { name = "llama-index", specifier = ">=0.10.0" },
     { name = "mistune", specifier = ">=3.1.3" },
+    { name = "patch", specifier = ">=1.16" },
     { name = "textual", specifier = ">=0.52.1" },
 ]
 
@@ -1527,6 +1529,12 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/c4/a5/3429bd13d82bebc78f4d78c3945efedef63a7cd0c15c17b2eeb838d1121f/pandas-2.2.3-cp39-cp39-musllinux_1_2_x86_64.whl", hash = "sha256:7eee9e7cea6adf3e3d24e304ac6b8300646e2a5d1cd3a3c2abed9101b0846761", size = 14450871, upload-time = "2024-09-20T13:09:59.779Z" },
     { url = "https://files.pythonhosted.org/packages/2f/49/5c30646e96c684570925b772eac4eb0a8cb0ca590fa978f56c5d3ae73ea1/pandas-2.2.3-cp39-cp39-win_amd64.whl", hash = "sha256:4850ba03528b6dd51d6c5d273c46f183f39a9baf3f0143e566b89450965b105e", size = 11618011, upload-time = "2024-09-20T13:10:02.351Z" },
 ]
+
+[[package]]
+name = "patch"
+version = "1.16"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/da/74/0815f03c82f4dc738e2bfc5f8966f682bebcc809f30c8e306e6cc7156a99/patch-1.16.zip", hash = "sha256:c62073f356cff054c8ac24496f1a3d7cfa137835c31e9af39a9f5292fd75bd9f", size = 12809, upload-time = "2016-02-13T15:18:58.285Z" }
 
 [[package]]
 name = "pillow"
