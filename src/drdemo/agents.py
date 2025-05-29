@@ -77,16 +77,3 @@ class ChatManager:
         handler = self.editor_agent.run(query, memory=self.memory)
         result = await handler
         return result
-
-# For backward compatibility
-def initialize_editor_agent():
-    """Initialize the editor agent."""
-    manager = ChatManager()
-    return manager.editor_agent
-
-async def run_agent(query: str, agent) -> str:
-    """Run the agent with the given query."""
-    # This is now deprecated - use ChatManager instead
-    logger.warning("Using deprecated run_agent function. Please use ChatManager instead.")
-    manager = ChatManager()
-    return await manager.run_editor(query)
