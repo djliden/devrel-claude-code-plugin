@@ -40,7 +40,8 @@ class MarkdownSectionParser:
             elif node['type'] in ['codespan', 'block_code']:
                 return node['raw']
             elif 'children' in node:
-                return ''.join(get_text_from_node(child) for child in node['children'])
+                # Join children with newlines to preserve markdown formatting
+                return '\n'.join(get_text_from_node(child) for child in node['children'])
             return ''
 
         def process_node(node, depth=0):
@@ -89,8 +90,9 @@ class MarkdownSectionParser:
                 
                 elif node['type'] == 'paragraph':
                     text = get_text_from_node(node)
-                    current_section.content += text + '\n'
-                    new_lines = text.count('\n') + 1
+                    # Don't add an extra newline since get_text_from_node already adds them
+                    current_section.content += text
+                    new_lines = text.count('\n')
                     self._current_line += new_lines
                     current_section.end_line = self._current_line - 1
                 
