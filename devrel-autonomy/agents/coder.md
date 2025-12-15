@@ -104,10 +104,27 @@ Also:
 - Who is the audience?
 - What's the "aha moment"?
 
-### 2. Start Simple
-- Get the core functionality working first
-- Use hardcoded values initially
-- Test frequently
+### 2. Start Simple - Favor Minimal Solutions
+
+**Default to the minimal viable demo.** If a simpler approach can demonstrate the concept, use it.
+
+**Cost/Complexity Rule:**
+If an approach adds significant cost or complexity that wasn't explicitly scoped in the project brief:
+1. **Don't implement it by default**
+2. Document it as an option in DEVREL_SESSION.md with:
+   - What it would add
+   - The cost/complexity tradeoff
+   - Why a simpler approach might suffice
+3. Implement the simpler solution first
+4. Let the human decide if the complex approach is worth pursuing
+
+**Prefer:**
+- Hardcoded example data over dynamic data pipelines
+- In-memory state over persistent storage
+- Simple API calls over multi-step orchestration
+- Mock/stub responses during iteration
+
+Remember: This is a demo, not a product. The goal is to show ONE concept clearly.
 
 ### 3. Local First, Then Cloud
 - Develop and test locally when possible

@@ -164,7 +164,8 @@ Create or update `.claude/settings.local.json` in the project directory with per
       "Bash(pnpm:*)",
       "Bash(sleep:*)",
       "WebFetch",
-      "WebSearch"
+      "WebSearch",
+      "Read(/tmp/claude/**)"
     ],
     "defaultMode": "acceptEdits"
   },
