@@ -147,6 +147,8 @@ Create or update `.claude/settings.local.json` in the project directory with per
       "Bash(sort:*)",
       "Bash(uniq:*)",
       "Bash(tree:*)",
+      "Bash(pkill:*)",
+      "Bash(pnpm:*)",
       "WebFetch",
       "WebSearch"
     ],
@@ -161,7 +163,11 @@ Create or update `.claude/settings.local.json` in the project directory with per
 
 **Use the Write tool to create this file** at `.claude/settings.local.json` in the project directory.
 
-The `sandbox` setting provides safety guardrails while `autoAllowBashIfSandboxed` auto-approves bash commands within those guardrails - best of both worlds.
+**⚠️ IMPORTANT: The `sandbox` block is REQUIRED.** Without it, compound bash commands (using `&&`) will prompt for permission. Verify your written file includes both:
+1. The `permissions` block with `allow` array and `defaultMode`
+2. The `sandbox` block with `enabled: true` and `autoAllowBashIfSandboxed: true`
+
+After writing, read the file back to verify it was written correctly.
 
 Then tell the user:
 "I've configured permissions for autonomous execution. The sandbox is enabled for safety, but bash commands will auto-approve within safe boundaries. You shouldn't see permission prompts during my work."
@@ -398,82 +404,109 @@ See `screenshots/README.md` for manifest of available images.
 
 ## Phase 4: Autonomous Execution
 
-Execute the plan following these core principles:
+**⚠️ CRITICAL: YOU ARE THE ORCHESTRATOR, NOT THE IMPLEMENTER ⚠️**
 
-### Principle 1: Autonomy
-- Work until finished or until hitting an impossible blocker
-- NEVER halt for permission to try something
-- NEVER halt for preference questions you can reasonably assume
-- Make decisions and document them in the decision log
-- Only stop for: hard external blockers, irreversible high-stakes decisions, or task completion
+Your role in this phase is to **coordinate**, not to code or write content directly.
 
-### Principle 2: DevRel Suitability
-This is **demo code**, not production code:
-- Simple and readable over robust and defensive
-- Clear inputs, visible outputs, easy to follow
-- Minimal scaffolding - no excessive try/except
-- Educational - code that teaches
-- Comments explain *why*, not *what*
+### What You DO (Orchestrator Role):
+- Spawn subagents using the Task tool
+- Manage DEVREL_SESSION.md (progress, decisions, questions)
+- Research and gather context (WebSearch, WebFetch, Read)
+- Light file operations (create directories, move files)
+- Start/stop servers after code is ready
+- Compile final review document
 
-**Avoid these anti-patterns:**
-- Walls of error handling
-- Abstract factory patterns for simple tasks
-- Configuration files when hardcoded values are clearer
-- "Production-ready" boilerplate that obscures the demo
+### What You DO NOT DO (Delegate These):
+❌ **Writing or modifying code** → Spawn `devrel-autonomy:coder` agent
+❌ **Writing blog posts, scripts, content** → Spawn `devrel-autonomy:writer` agent
+❌ **Quality review of artifacts** → Spawn `devrel-autonomy:reviewer` agent
+❌ **Browser automation, screenshots** → Spawn `devrel-autonomy:coder` agent (it has Playwright)
 
-### Principle 3: Workflow Integration
-The human reviewer has limited time (~1 hour/day):
-- Accumulate questions as you work, don't interrupt
-- Make a good-faith effort to answer questions yourself first
-- Document every significant decision with rationale
-- **Document all sources/URLs consulted in the Sources section**
-- Note assumptions and confidence level
+**If you catch yourself about to use Edit/Write on a .py, .ts, .js, or .md content file: STOP. Spawn a subagent instead.**
+
+---
+
+## Subagent Workflow (MANDATORY)
+
+You MUST use the Task tool with the specialized agent types. Here's the workflow:
+
+### Step 1: Code Development
+```
+Task tool call:
+- subagent_type: "devrel-autonomy:coder"
+- prompt: Include project brief, resource constraints, what to build, any external project URLs
+```
+The coder agent will:
+- Clone repos, set up environment
+- Write/modify code
+- Test that it runs
+- Take screenshots if Playwright is needed
+- Return when code is working
+
+### Step 2: Content Creation (after code works)
+```
+Task tool call:
+- subagent_type: "devrel-autonomy:writer"
+- prompt: Include working code location, style sample, target format (blog/video/etc), screenshots location
+```
+Spawn 2-3 writer agents in parallel with different approaches:
+- "Write with problem-first narrative"
+- "Write with story-driven approach"
+- "Write with quick-win scannable format"
+
+### Step 3: Quality Review
+```
+Task tool call:
+- subagent_type: "devrel-autonomy:reviewer"
+- prompt: Include all artifact locations for review
+```
+The reviewer will:
+- Verify code runs
+- Check content quality
+- Flag issues or approve
+
+### Step 4: Compile Review Document (YOU do this)
+- Update DEVREL_SESSION.md with final status
+- Ensure all sections are complete
+- Start any servers/UIs for human to explore
+
+---
+
+## Execution Principles
+
+### Autonomy
+- Work until finished or truly blocked
+- Don't halt for permission to try things
+- Make decisions and document them
+- Only stop for: hard blockers, completion
+
+### DevRel Suitability (Enforce in Subagents)
+This is demo code, not production code:
+- Simple and readable
+- Minimal error handling
+- Educational value
+- Clear demonstration flow
+
+### Workflow Integration
+- Accumulate questions, don't interrupt
+- Document every significant decision
 - Log what didn't work and why
-- Clearly separate "decided" from "needs input"
 
-### Principle 4: Human Touch
-- Base all writing on the provided style sample
-- Match tone, structure, level of formality
-- Generate options where appropriate, not just one path
-- Make content modular and editable
+---
 
-## Execution Workflow (MUST USE SUBAGENTS)
+## Tools for Orchestrator
 
-You MUST use the Task tool to spawn specialized agents. Do NOT do all work inline.
+**Use directly:**
+- Read, Glob, Grep (understanding codebase)
+- WebSearch, WebFetch (research)
+- Bash (git clone, server start/stop, directory ops)
+- TodoWrite (progress tracking)
+- Write/Edit (ONLY for DEVREL_SESSION.md, CLAUDE.md, README.md)
 
-1. **Code Development**
-   - Spawn a Task with subagent_type="general-purpose"
-   - In the prompt, include the full `devrel-coder` agent instructions
-   - Provide: project brief, resource constraints, what to build
-   - Agent works locally first, uses `dbai` CLI for Databricks if needed
-
-2. **Content Creation**
-   - Spawn a Task with subagent_type="general-purpose"
-   - In the prompt, include the full `devrel-writer` agent instructions
-   - Provide: working code, style sample, target format
-   - Agent produces drafts matching user's voice
-
-3. **Quality Check**
-   - Spawn a Task with subagent_type="general-purpose"
-   - In the prompt, include the full `devrel-reviewer` agent instructions
-   - Provide: all artifacts for review
-   - Agent checks code runs, content quality, completeness
-   - Agent can request fixes (spawn coder/writer again) or escalate to human
-
-4. **Compile Review Document**
-   - Update `DEVREL_SESSION.md` with final status
-   - Ensure Sources section has all URLs consulted
-   - Ensure decision log is complete
-   - Format accumulated questions clearly
-   - Create checklist of items needing human input
-
-## Tools Available
-
-- **Local development**: Read, Write, Edit, Bash, Glob, Grep
-- **Databricks**: `dbai` CLI commands (notebook run, sql, serving, command)
-- **Research**: WebSearch, WebFetch (document all URLs in Sources section!)
-- **Agents**: Task tool to spawn subagents (REQUIRED for coder, writer, reviewer work)
-- **Tracking**: TodoWrite for progress, DEVREL_SESSION.md for decisions
+**Delegate via Task tool:**
+- All code development → devrel-autonomy:coder
+- All content writing → devrel-autonomy:writer
+- All quality review → devrel-autonomy:reviewer
 
 ## When You're Done
 
