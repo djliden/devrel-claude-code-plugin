@@ -174,3 +174,16 @@ cython_debug/
 .pypirc
 
 scratch.ipynb
+
+# MLflow
+mlflow.db
+mlruns/
+
+# Python version
+.python-version
+
+# Claude Code
+.claude/
+
+# Cloned repos in demos
+ai-chat-ui/

@@ -1,0 +1,13 @@
+{
+  "name": "devrel-marketplace",
+  "owner": {
+    "name": "Daniel Liden"
+  },
+  "plugins": [
+    {
+      "name": "devrel-autonomy",
+      "source": "./devrel-autonomy",
+      "description": "Autonomous DevRel demo creation system"
+    }
+  ]
+}
