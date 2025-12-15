@@ -169,8 +169,29 @@ Create or update `.claude/settings.local.json` in the project directory with per
 
 After writing, read the file back to verify it was written correctly.
 
-Then tell the user:
-"I've configured permissions for autonomous execution. The sandbox is enabled for safety, but bash commands will auto-approve within safe boundaries. You shouldn't see permission prompts during my work."
+**⚠️ CRITICAL: RESTART REQUIRED**
+
+Tell the user:
+```
+I've written the permissions file to .claude/settings.local.json.
+
+**Claude Code loads settings at startup, so you need to restart for these to take effect.**
+
+Please:
+1. Exit this Claude Code session (Ctrl+C or type /exit)
+2. Start a new Claude Code session in this same directory
+3. Type /resume to pick up where we left off
+
+The /resume command will restore our conversation context.
+```
+
+Then **save the current state** by creating/updating DEVREL_SESSION.md with:
+- Project brief gathered so far
+- Artifacts requested
+- Style sample URL
+- Any other context collected
+
+This ensures the next session can resume without re-asking questions.
 
 ### 2.3 Browser Automation (Optional)
 
@@ -204,7 +225,17 @@ To enable, run: `/plugin install playwright@claude-plugins-official`"
    "mcp__plugin_playwright_playwright__browser_navigate_back"
    ```
 
-2. **Test Playwright** - Do a quick navigate + screenshot test to confirm it works without prompts before starting autonomous work.
+2. **Restart Required Again** - If you added Playwright permissions, the user must restart Claude Code again for them to take effect. Tell them:
+   ```
+   I've added Playwright permissions. Please restart Claude Code one more time:
+   1. Exit (Ctrl+C or /exit)
+   2. Start new session in this directory
+   3. Type /resume
+
+   Then we can verify browser automation works.
+   ```
+
+3. **After restart, test Playwright** - Do a quick navigate + screenshot test to confirm it works without prompts before starting autonomous work.
 
 #### Playwright Authentication Flow
 
