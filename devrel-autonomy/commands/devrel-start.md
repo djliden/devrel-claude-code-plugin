@@ -356,6 +356,24 @@ Create the session tracking file with these sections:
 ## Review Checklist
 - [ ] Items for human review
 
+## Content Candidates
+For each content type, multiple candidates are generated. Pick the best or combine elements.
+
+### Blog Post Candidates
+| File | Approach | Notes |
+|------|----------|-------|
+| blog_post_problem_first.md | Problem-first narrative | Technical depth, shows the pain point |
+| blog_post_story_driven.md | Story-driven | Conversational, follows a journey |
+| blog_post_quick_win.md | Quick-win hook | Scannable, gets to value fast |
+
+**Recommendation**: [which one works best and why]
+
+### [Other Content Type] Candidates
+[Same format]
+
+## Screenshots
+See `screenshots/README.md` for manifest of available images.
+
 ## Deliverables
 [List of output files]
 

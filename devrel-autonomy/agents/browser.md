@@ -43,6 +43,28 @@ mcp__playwright__browser_take_screenshot()
 # Save observation: "Screenshot shows the main dashboard with..."
 ```
 
+#### IMPORTANT: Save Screenshots for Writer Agent
+
+Screenshots taken with Playwright are visible to you but need to be saved to files for the writer to use in blog posts/docs.
+
+**After taking screenshots:**
+1. Create a `screenshots/` directory in the project
+2. Save each screenshot with a descriptive filename
+3. Document what each screenshot shows
+
+**Screenshot manifest** - Create `screenshots/README.md`:
+```markdown
+# Screenshots
+
+| File | Description | Use in content |
+|------|-------------|----------------|
+| mlflow-traces.png | MLflow trace view showing conversation turns | Blog: "How it works" section |
+| chat-ui-response.png | Chat UI with model response | Blog: hero image or demo section |
+| error-state.png | Error message when API key missing | Troubleshooting section |
+```
+
+**The writer agent will look for this manifest** to incorporate screenshots into content.
+
 ### 2. Testing a Web Application
 
 ```

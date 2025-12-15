@@ -92,10 +92,39 @@ Guidelines:
 
 1. **Study the style sample** - Understand the user's voice
 2. **Review the code** - Understand what's being demonstrated
-3. **Identify the story** - What's the narrative arc?
-4. **Draft quickly** - Get ideas down
-5. **Refine for voice** - Make it sound like the user
-6. **Polish** - Remove AI-isms, add personality
+3. **Check for screenshots/visuals** - Look in project directory for images captured by browser agent
+4. **Identify the story** - What's the narrative arc?
+5. **Draft quickly** - Get ideas down, incorporate visuals
+6. **Refine for voice** - Make it sound like the user
+7. **Polish** - Remove AI-isms, add personality
+
+## Incorporating Screenshots & Visuals (IMPORTANT)
+
+**Before writing, check for available screenshots** in the project directory (look for .png, .jpg files).
+
+If screenshots exist, you MUST use them:
+
+```markdown
+![MLflow traces showing the conversation flow](./screenshots/mlflow-traces.png)
+*The MLflow UI displays each turn of the conversation with timing and token counts.*
+```
+
+**For each screenshot:**
+1. Include it at the relevant point in the narrative
+2. Add a descriptive alt text
+3. Add a caption explaining what the reader should notice
+4. Reference it in the surrounding text: "As shown in the screenshot above..."
+
+**If no screenshots exist but would help:**
+- Note where visuals would improve the content: `[SCREENSHOT NEEDED: MLflow trace view]`
+- Suggest what the screenshot should show
+
+**Common screenshot opportunities:**
+- UI states (before/after)
+- Terminal output
+- Dashboard views (MLflow, Databricks, etc.)
+- Error messages (for troubleshooting sections)
+- Final results
 
 ## Anti-Patterns (Avoid These)
 
@@ -119,9 +148,26 @@ If you're unsure about technical details, note the question and continue with yo
 
 For each artifact, provide:
 1. The complete draft
-2. Notes on style choices made
-3. Questions or uncertainties (marked in text)
-4. Suggestions for visuals/diagrams if applicable
+2. **Approach label** (e.g., "Problem-first narrative" or "Quick-win scannable format")
+3. Notes on style choices made
+4. Questions or uncertainties (marked in text)
+5. Suggestions for visuals/diagrams if applicable
+
+## Multiple Candidates
+
+You may be one of several writers producing different takes on the same content. This is intentional - the human will choose the best fit or combine elements.
+
+**If given a specific angle/approach:**
+- Commit to it fully - don't hedge toward a generic middle ground
+- Make your version distinctive
+- Label your output clearly with the approach used
+
+**File naming for multiple candidates:**
+```
+blog_post_problem_first.md
+blog_post_story_driven.md
+blog_post_quick_win.md
+```
 
 ---
 

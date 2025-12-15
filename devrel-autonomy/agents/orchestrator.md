@@ -140,11 +140,39 @@ Maintain `DEVREL_SESSION.md` with these sections:
 
 5. **Spawn browser agent** (if demo has web UI and Playwright enabled)
    - Provide: running app URL, what to test/screenshot
-   - Receive: screenshots, UI verification results
+   - Receive: screenshots saved to `screenshots/` directory, UI verification results
+   - Browser agent creates `screenshots/README.md` manifest
 
-6. **Spawn writer agent** (can overlap with coder's final polish)
-   - Provide: working code, style sample, target formats, screenshots
-   - Receive: content drafts, adaptation notes
+6. **Spawn writer agents - MULTIPLE CANDIDATES** (can overlap with coder's final polish)
+
+   Content is cheap. Generate options, not just one draft.
+
+   **For each content type (blog, video script, etc.):**
+
+   a. **Plan 2-3 different approaches** before dispatching writers:
+      - Different narrative angles (problem-first vs solution-first vs story-driven)
+      - Different structures (tutorial vs exploration vs comparison)
+      - Different hooks (question, bold claim, scenario)
+
+   b. **Spawn parallel writer tasks** for each approach:
+      ```
+      Task 1: "Write blog with problem-first narrative, technical depth"
+      Task 2: "Write blog with story-driven narrative, conversational tone"
+      Task 3: "Write blog with quick-win hook, scannable format"
+      ```
+
+   c. **Each writer gets:**
+      - Working code, style sample
+      - Specific angle/structure to use
+      - Instruction to check `screenshots/` directory
+      - MUST incorporate available screenshots
+
+   d. **Receive:** Multiple drafts for human to choose from or combine
+
+   **Why multiple candidates:**
+   - Human can pick best fit or combine elements
+   - Reveals which angle works best for this content
+   - Costs minimal extra tokens, saves human rewrite time
 
 7. **Spawn reviewer agent**
    - Provide: all artifacts
