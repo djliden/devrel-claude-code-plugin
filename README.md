@@ -8,7 +8,7 @@ A Claude Code plugin system for autonomous DevRel demo creation. Enables Claude 
 
 ```bash
 # Add this repository as a plugin marketplace
-/plugin marketplace add djliden/devrel-claude-code-plugin/devrel-marketplace
+/plugin marketplace add djliden/devrel-claude-code-plugin
 
 # Install the plugin
 /plugin install devrel-autonomy@devrel-marketplace
@@ -21,7 +21,7 @@ A Claude Code plugin system for autonomous DevRel demo creation. Enables Claude 
 git clone https://github.com/djliden/devrel-claude-code-plugin.git
 
 # Add the local marketplace
-/plugin marketplace add ./devrel-claude-code-plugin/devrel-marketplace
+/plugin marketplace add ./devrel-claude-code-plugin
 
 # Install the plugin
 /plugin install devrel-autonomy@devrel-marketplace
@@ -107,22 +107,20 @@ Or add to `.claude/settings.json`:
 
 ```
 devrel-claude-code-plugin/
-├── devrel-marketplace/
-│   ├── .claude-plugin/
-│   │   └── marketplace.json
-│   └── devrel-autonomy/          # The plugin
-│       ├── .claude-plugin/
-│       │   └── plugin.json
-│       ├── agents/
-│       │   ├── coder.md
-│       │   ├── orchestrator.md
-│       │   ├── reviewer.md
-│       │   └── writer.md
-│       └── commands/
-│           ├── devrel-start.md
-│           ├── devrel-expand.md
-│           └── devrel-review.md
-└── mlflow-make-judge-demo/       # Example demo project
+├── .claude-plugin/
+│   └── marketplace.json          # Marketplace manifest (at repo root)
+└── devrel-autonomy/              # The plugin
+    ├── .claude-plugin/
+    │   └── plugin.json
+    ├── agents/
+    │   ├── coder.md
+    │   ├── orchestrator.md
+    │   ├── reviewer.md
+    │   └── writer.md
+    └── commands/
+        ├── devrel-start.md
+        ├── devrel-expand.md
+        └── devrel-review.md
 ```
 
 ## Example Usage
