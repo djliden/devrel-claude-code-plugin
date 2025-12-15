@@ -177,12 +177,28 @@ If the demo involves a web UI, ask if the user wants browser automation enabled:
 
 To enable, run: `/plugin install playwright@claude-plugins-official`"
 
-When Playwright is enabled, you'll have access to MCP tools:
-- `mcp__playwright__browser_navigate` - Go to URLs
-- `mcp__playwright__browser_click` - Click elements
-- `mcp__playwright__browser_type` - Fill in forms
-- `mcp__playwright__browser_take_screenshot` - Capture screenshots
-- `mcp__playwright__browser_snapshot` - Get accessibility tree
+#### If User Wants Playwright
+
+1. **Add Playwright MCP permissions** to the settings.local.json you created above:
+
+   Ask user: "Should I add Playwright permissions so browser automation runs without prompts?"
+
+   If yes, add these to the `permissions.allow` array:
+   ```json
+   "mcp__plugin_playwright_playwright__browser_navigate",
+   "mcp__plugin_playwright_playwright__browser_snapshot",
+   "mcp__plugin_playwright_playwright__browser_take_screenshot",
+   "mcp__plugin_playwright_playwright__browser_click",
+   "mcp__plugin_playwright_playwright__browser_type",
+   "mcp__plugin_playwright_playwright__browser_hover",
+   "mcp__plugin_playwright_playwright__browser_wait_for",
+   "mcp__plugin_playwright_playwright__browser_tabs",
+   "mcp__plugin_playwright_playwright__browser_close",
+   "mcp__plugin_playwright_playwright__browser_resize",
+   "mcp__plugin_playwright_playwright__browser_navigate_back"
+   ```
+
+2. **Test Playwright** - Do a quick navigate + screenshot test to confirm it works without prompts before starting autonomous work.
 
 #### Playwright Authentication Flow
 
