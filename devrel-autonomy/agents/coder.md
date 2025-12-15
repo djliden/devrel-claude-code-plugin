@@ -96,7 +96,27 @@ def create_completion(prompt: str) -> str:
 - Fix issues immediately
 - Document approaches that didn't work
 
-### 5. Polish for Demo
+### 5. Test Web UIs (if applicable)
+If the demo has a web interface and Playwright is enabled, use the MCP tools:
+
+```
+# Navigate to the running app
+mcp__playwright__browser_navigate(url="http://localhost:8000")
+
+# Take a screenshot for documentation
+mcp__playwright__browser_take_screenshot()
+
+# Test form interactions
+mcp__playwright__browser_type(selector="#input-field", text="test query")
+mcp__playwright__browser_click(selector="#submit-button")
+
+# Get page structure for debugging
+mcp__playwright__browser_snapshot()
+```
+
+The browser window is visible - useful for debugging and the user can intervene if needed (e.g., manual login).
+
+### 6. Polish for Demo
 - Add clear section comments
 - Ensure outputs are visible and meaningful
 - Create a clean execution path

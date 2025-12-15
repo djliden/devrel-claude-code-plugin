@@ -9,65 +9,130 @@ You are starting a new DevRel demo project. Your goal is to gather requirements,
 
 ## Phase 1: Gather Requirements
 
-Use the AskUserQuestion tool to collect the following information from the user. You may batch these into 1-2 question sets:
+Collect the following information through a natural conversation. Ask questions one at a time or in small groups. Do NOT use AskUserQuestion with prepopulated options for open-ended questions - just ask directly.
 
-### Required Information
-1. **Project concept/brief**: What is the demo supposed to show? What's the use case?
-2. **Target artifacts**: Which outputs are needed?
+### Required Information (ask conversationally)
+
+1. **Project concept/brief** (open-ended, ask directly):
+   - "What should this demo show? What's the use case you want to demonstrate?"
+   - Let user describe freely - don't provide options
+
+2. **CRITICAL: Clarify Build vs Use** (ask IMMEDIATELY after concept):
+
+   If the user mentions ANY existing project, library, tool, or GitHub repo, you MUST clarify:
+
+   "I want to make sure I understand correctly:
+   - Are you asking me to **USE/INTEGRATE** an existing project (like [project they mentioned])?
+   - Or are you asking me to **BUILD** something new that's similar?
+
+   If using an existing project, please share the GitHub URL or documentation link."
+
+   **THIS IS A CRITICAL CHECKPOINT.** Misunderstanding this wastes hours of work.
+
+   Examples of things to catch:
+   - "demo the pydantic ai chat ui" → STOP: Are they asking to use github.com/pydantic/ai-chat-ui, or build a new chat UI?
+   - "show the MLflow integration with X" → STOP: Is X an existing project to integrate, or a concept to build?
+   - "demo this tool" → STOP: Which specific tool? Get the exact repo/docs link.
+
+   **When in doubt, ask.** Getting this wrong is a severe dead-end.
+
+3. **Target artifacts** (use AskUserQuestion with multiSelect):
    - Working code demo
    - Blog post
    - Video script
    - Runbook/guide
    - Slides outline
-3. **Writing sample**: A sample of the user's writing (paste text or provide a link to a published piece)
 
-### Resource Scoping (Critical)
-4. **AI/LLM resources**: Which models/APIs can be used for the demo AND for testing?
-   - Which API keys are available in the environment?
-   - Preferred model for testing (e.g., use gpt-4o-mini for iteration, not gpt-4o)
-   - Any cost constraints or token budgets to be aware of?
-5. **Databricks resources** (if applicable): Which workspace, clusters, or resources can be used?
-6. **Other external services**: Any APIs, databases, or services needed?
+3. **Writing sample** (open-ended, ask directly):
+   - "Please share a sample of your writing - paste text or provide a link to something you've published"
+   - This is for matching their voice/style
+
+### Resource Scoping (Critical - ask directly)
+
+4. **AI/LLM resources** - ask:
+   - "Which API keys do you have available? (OpenAI, Anthropic, etc.)"
+   - "Which model should I use for testing iterations? (e.g., gpt-4o-mini to save costs)"
+   - "Any cost constraints I should know about?"
+
+5. **Databricks resources** (if applicable):
+   - "Will this demo use Databricks? If so, which workspace/resources?"
+
+6. **Other external services**:
+   - "Any other APIs, databases, or services the demo needs?"
 
 ### Optional Information
-7. **Constraints or requirements**: Technologies to use/avoid, specific patterns
-8. **Audience**: Who is this for? (developers, data scientists, executives, etc.)
+7. **Constraints**: Technologies to use/avoid, specific patterns
+8. **Audience**: Who is this for?
 
-## Phase 2: Configure Sandbox Permissions (CRITICAL)
+## Phase 2: Permissions Verification (CRITICAL)
 
-Before autonomous execution, you MUST ensure the sandbox won't block operations. This is essential for uninterrupted work.
+Before autonomous execution, you MUST verify permissions AND present a clear summary for user confirmation.
 
-### 2.1 Required Permissions
-The following operations need to run without prompts:
-- `uv run`, `uv sync` - Python environment management
-- `uvicorn`, `fastapi` - Running local servers
-- `mlflow ui` - Viewing traces
-- `npm install`, `npm run` - Node.js operations (if needed)
-- File writes to the project directory
+### 2.1 Verify & Summarize Access
 
-### 2.2 Configure Permissions
-Ask the user to add permissions to their Claude Code settings. Provide this exact instruction:
+Present a clear summary to the user of what you will access autonomously:
 
 ```
-Please add these permissions to allow autonomous execution:
+## Pre-Flight Permissions Check
 
-Run: /permissions add "Bash(uv:*)" "Bash(uvicorn:*)" "Bash(mlflow:*)" "Bash(npm:*)" "Bash(curl:*)"
+Based on what you've told me, here's what I'll be using during autonomous execution:
 
-Or add to .claude/settings.json:
-{
-  "permissions": {
-    "allow": [
-      "Bash(uv:*)",
-      "Bash(uvicorn:*)",
-      "Bash(mlflow:*)",
-      "Bash(npm:*)",
-      "Bash(curl:*)"
-    ]
-  }
-}
+**API Keys / Services:**
+- [List specific keys/services from user input, e.g., "OpenAI API (using gpt-4o-mini for testing)"]
+- [e.g., "Databricks workspace: your-workspace.cloud.databricks.com"]
+
+**Local Operations (no prompts):**
+- Python environment: uv run, uv sync
+- [If applicable: Local servers: uvicorn, fastapi]
+- [If applicable: MLflow UI for traces]
+- File read/write in project directory
+
+**Web Access:**
+- Web search and fetch for documentation/research
+- [List any specific external APIs the demo will call]
+
+**What I WON'T do without asking:**
+- Push to git repositories
+- Deploy to production environments
+- Make purchases or incur costs beyond API usage
+- Access files outside the project directory
+
+Does this look correct? Any changes before I start?
 ```
 
-**IMPORTANT**: Do NOT proceed with autonomous execution until permissions are confirmed. This is the one exception to "don't ask for permission" - sandbox config must be right before we start.
+### 2.2 Configure Sandbox Permissions
+
+If sandbox permissions aren't already configured, ask user to add them:
+
+```
+To allow autonomous execution, please run:
+
+/permissions add "Bash(uv:*)" "Bash(uvicorn:*)" "Bash(mlflow:*)" "Bash(npm:*)" "Bash(curl:*)"
+```
+
+### 2.3 Browser Automation (Optional)
+
+If the demo involves a web UI, ask if the user wants browser automation enabled:
+
+"Does this demo have a web UI? If so, I can use Playwright to:
+- Test the UI automatically
+- Take screenshots for documentation
+- Verify forms and interactions work
+
+To enable, run: `/plugin install playwright@claude-plugins-official`"
+
+When Playwright is enabled, you'll have access to MCP tools:
+- `mcp__playwright__browser_navigate` - Go to URLs
+- `mcp__playwright__browser_click` - Click elements
+- `mcp__playwright__browser_type` - Fill in forms
+- `mcp__playwright__browser_take_screenshot` - Capture screenshots
+- `mcp__playwright__browser_snapshot` - Get accessibility tree
+
+**Note**: The browser window is visible - the user can see what's happening and can intervene (e.g., to log in manually).
+
+### 2.4 Get Explicit Go-Ahead
+
+After presenting the summary, wait for user confirmation before proceeding. This is the ONE exception to "don't ask for permission" - the user must explicitly approve the access summary before autonomous work begins.
 
 ## Phase 3: Set Up Project Structure
 
