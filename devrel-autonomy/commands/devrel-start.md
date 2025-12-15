@@ -111,6 +111,19 @@ Does this look correct? Any changes before I start?
 
 ### 2.2 Configure Permissions for Autonomous Execution
 
+First, ask about any additional server tools:
+
+```
+The default settings handle common tools (mlflow, uvicorn, streamlit, docker, etc.).
+
+Will this demo use any other server frameworks or CLI tools that need to bind to ports?
+Examples: jupyter, tensorboard, vite, next, remix, rails, cargo, go run...
+
+List any additional tools, or say "none" to use defaults.
+```
+
+Add any user-specified tools to the `excludedCommands` array in the settings below.
+
 Create or update `.claude/settings.local.json` in the project directory with permissions for autonomous work:
 
 ```json
@@ -149,6 +162,7 @@ Create or update `.claude/settings.local.json` in the project directory with per
       "Bash(tree:*)",
       "Bash(pkill:*)",
       "Bash(pnpm:*)",
+      "Bash(sleep:*)",
       "WebFetch",
       "WebSearch"
     ],
@@ -156,16 +170,28 @@ Create or update `.claude/settings.local.json` in the project directory with per
   },
   "sandbox": {
     "enabled": true,
-    "autoAllowBashIfSandboxed": true
+    "autoAllowBashIfSandboxed": true,
+    "excludedCommands": [
+      "docker",
+      "mlflow",
+      "uvicorn",
+      "streamlit",
+      "gradio",
+      "flask",
+      "fastapi"
+    ]
   }
 }
 ```
 
 **Use the Write tool to create this file** at `.claude/settings.local.json` in the project directory.
 
-**⚠️ IMPORTANT: The `sandbox` block is REQUIRED.** Without it, compound bash commands (using `&&`) will prompt for permission. Verify your written file includes both:
+**⚠️ IMPORTANT: The `sandbox` block is REQUIRED.** Verify your written file includes:
 1. The `permissions` block with `allow` array and `defaultMode`
-2. The `sandbox` block with `enabled: true` and `autoAllowBashIfSandboxed: true`
+2. The `sandbox` block with:
+   - `enabled: true` - Enables OS-level sandboxing
+   - `autoAllowBashIfSandboxed: true` - Auto-approves commands within sandbox boundaries
+   - `excludedCommands` - Server tools that need to bypass sandbox (bind ports, etc.)
 
 After writing, read the file back to verify it was written correctly.
 

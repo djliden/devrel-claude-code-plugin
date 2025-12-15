@@ -71,6 +71,32 @@ def create_completion(prompt: str) -> str:
         raise
 ```
 
+## Bash Command Guidelines
+
+**Compound commands (`&&`, `||`) are fine for most operations.** The sandbox auto-approves them when they stay within safe boundaries.
+
+**Exception: Server-starting commands should run separately.**
+
+Commands that bind to ports (mlflow, uvicorn, streamlit, etc.) need to bypass the sandbox. The `excludedCommands` setting handles this, but only matches the first command in a chain.
+
+```bash
+# FINE - normal compound commands work
+cd /project && uv sync && python script.py
+git add . && git commit -m "message"
+mkdir -p foo/bar && touch foo/bar/file.txt
+
+# BAD - server command buried in chain, will prompt
+cd /project && mlflow ui --port 5000
+
+# GOOD - run server command separately
+cd /project
+mlflow ui --port 5000
+```
+
+Also:
+- Prefer `uv run mlflow ui` or `mlflow ui` over `.venv/bin/mlflow ui`
+- Use absolute paths when possible to avoid `cd` chains
+
 ## Development Workflow
 
 ### 1. Understand the Demo Goal
