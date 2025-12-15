@@ -1,4 +1,4 @@
-# DevRel Tutorial Maker
+# DevRel Claude Code Plugin
 
 A Claude Code plugin system for autonomous DevRel demo creation. Enables Claude Code to develop demos, documentation, and content with minimal human supervision.
 
@@ -8,7 +8,7 @@ A Claude Code plugin system for autonomous DevRel demo creation. Enables Claude 
 
 ```bash
 # Add this repository as a plugin marketplace
-/plugin marketplace add djliden/devrel-tutorial-maker/devrel-marketplace
+/plugin marketplace add djliden/devrel-claude-code-plugin/devrel-marketplace
 
 # Install the plugin
 /plugin install devrel-autonomy@devrel-marketplace
@@ -18,10 +18,10 @@ A Claude Code plugin system for autonomous DevRel demo creation. Enables Claude 
 
 ```bash
 # Clone the repo
-git clone https://github.com/djliden/devrel-tutorial-maker.git
+git clone https://github.com/djliden/devrel-claude-code-plugin.git
 
 # Add the local marketplace
-/plugin marketplace add ./devrel-tutorial-maker/devrel-marketplace
+/plugin marketplace add ./devrel-claude-code-plugin/devrel-marketplace
 
 # Install the plugin
 /plugin install devrel-autonomy@devrel-marketplace
@@ -106,7 +106,7 @@ Or add to `.claude/settings.json`:
 ## Repository Structure
 
 ```
-devrel-tutorial-maker/
+devrel-claude-code-plugin/
 ├── devrel-marketplace/
 │   ├── .claude-plugin/
 │   │   └── marketplace.json

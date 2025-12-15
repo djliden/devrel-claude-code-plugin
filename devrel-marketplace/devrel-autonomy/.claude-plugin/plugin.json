@@ -6,7 +6,7 @@
     "name": "Daniel Liden",
     "email": "daniel.liden@databricks.com"
   },
-  "repository": "https://github.com/djliden/devrel-tutorial-maker",
+  "repository": "https://github.com/djliden/devrel-claude-code-plugin",
   "license": "MIT",
   "keywords": [
     "devrel",
