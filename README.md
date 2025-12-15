@@ -41,10 +41,12 @@ Once installed, you'll have access to these slash commands:
 
 ### `/devrel-start` - New Project Kickoff
 
-1. **Gather Requirements**: Collects project concept, target artifacts (code, blog, video script), writing samples for style matching, and resource constraints
-2. **Configure Permissions**: Ensures sandbox permissions are set for autonomous execution
-3. **Execute Autonomously**: Works until complete, documenting decisions and logging progress
-4. **Deliver Review Package**: Presents working code + content drafts + decision log + review checklist
+1. **Gather Requirements**: Collects project concept, target artifacts, writing samples for style matching, and resource constraints
+2. **Clarify Build vs Use**: If you mention an existing project/tool, confirms whether to USE it or BUILD something new (prevents wasted effort)
+3. **Permissions Verification**: Shows exactly what will be accessed (API keys, services, local ops) and gets explicit approval
+4. **Browser Setup** (optional): If demo has a web UI, offers Playwright integration for testing and screenshots
+5. **Execute Autonomously**: Works until complete, documenting decisions and logging progress
+6. **Deliver Review Package**: Presents working code + content drafts + decision log + review checklist
 
 ### `/devrel-expand` - Artifact Expansion
 
@@ -103,6 +105,32 @@ Or add to `.claude/settings.json`:
 }
 ```
 
+## Specialized Agents
+
+The plugin uses specialized subagents for different tasks:
+
+| Agent | Purpose |
+|-------|---------|
+| **orchestrator** | Coordinates workflow, manages session file, delegates to other agents |
+| **coder** | Writes demo code - simple, readable, educational (not production code) |
+| **writer** | Creates content (blogs, scripts) matching your writing style |
+| **reviewer** | QA check before human review - verifies code runs, content matches style |
+| **browser** | Playwright-based UI testing, screenshots, web interaction |
+
+## Browser Automation (Optional)
+
+For demos with web UIs, install the Playwright plugin:
+
+```bash
+/plugin install playwright@claude-plugins-official
+```
+
+This enables:
+- Automated UI testing
+- Screenshot capture for documentation
+- Form filling and interaction verification
+- Works with authenticated sites (you log in manually, Claude continues)
+
 ## Repository Structure
 
 ```
@@ -113,10 +141,11 @@ devrel-claude-code-plugin/
     ├── .claude-plugin/
     │   └── plugin.json
     ├── agents/
-    │   ├── coder.md
-    │   ├── orchestrator.md
-    │   ├── reviewer.md
-    │   └── writer.md
+    │   ├── browser.md            # UI testing and screenshots
+    │   ├── coder.md              # Demo code development
+    │   ├── orchestrator.md       # Workflow coordination
+    │   ├── reviewer.md           # Quality assurance
+    │   └── writer.md             # Content creation
     └── commands/
         ├── devrel-start.md
         ├── devrel-expand.md
