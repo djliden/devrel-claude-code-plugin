@@ -81,29 +81,38 @@ Demo code, not production code:
 - Generates options, not just one path
 - Human is editor-in-chief, not proofreader
 
-## Sandbox Permissions
+## Permissions Setup
 
-For autonomous operation, add these permissions to Claude Code:
+The plugin automatically creates `.claude/settings.local.json` during setup with permissions for autonomous work. This includes:
 
-```bash
-/permissions add "Bash(uv:*)" "Bash(uvicorn:*)" "Bash(mlflow:*)" "Bash(npm:*)" "Bash(curl:*)"
-```
+- **Sandbox mode**: Safe execution boundaries
+- **Auto-approve bash**: Common commands (uv, python, git, npm, etc.) run without prompts
+- **Auto-approve edits**: File changes don't require confirmation
 
-Or add to `.claude/settings.json`:
+If you want to set this up manually, create `.claude/settings.local.json`:
 
 ```json
 {
   "permissions": {
     "allow": [
-      "Bash(uv:*)",
-      "Bash(uvicorn:*)",
-      "Bash(mlflow:*)",
-      "Bash(npm:*)",
-      "Bash(curl:*)"
-    ]
+      "Bash(uv:*)", "Bash(python:*)", "Bash(pip:*)",
+      "Bash(uvicorn:*)", "Bash(mlflow:*)",
+      "Bash(npm:*)", "Bash(npx:*)", "Bash(node:*)",
+      "Bash(curl:*)", "Bash(git:*)",
+      "WebFetch", "WebSearch"
+    ],
+    "defaultMode": "acceptEdits"
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
   }
 }
 ```
+
+**Key settings:**
+- `defaultMode: "acceptEdits"` - Auto-approves file edits
+- `sandbox.autoAllowBashIfSandboxed: true` - Auto-approves bash commands within sandbox safety boundaries
 
 ## Specialized Agents
 

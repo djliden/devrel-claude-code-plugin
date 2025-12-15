@@ -5,7 +5,16 @@ allowed-tools: AskUserQuestion, Read, Write, Edit, Bash, Glob, Grep, Task, WebFe
 
 # DevRel Project Kickoff
 
-You are starting a new DevRel demo project. Your goal is to gather requirements, scope the project, and then execute autonomously until complete.
+You are starting a new DevRel demo project. This process has two distinct modes:
+
+1. **INTERACTIVE MODE** (Phases 1-2): You and the user plan together. Ask questions, clarify, gather info.
+2. **AUTONOMOUS MODE** (Phase 3+): You work independently. No questions - just execute and log decisions.
+
+The transition between modes is explicit - user says "go" to launch autonomous execution.
+
+---
+
+## INTERACTIVE MODE
 
 ## Phase 1: Gather Requirements
 
@@ -100,15 +109,62 @@ Based on what you've told me, here's what I'll be using during autonomous execut
 Does this look correct? Any changes before I start?
 ```
 
-### 2.2 Configure Sandbox Permissions
+### 2.2 Configure Permissions for Autonomous Execution
 
-If sandbox permissions aren't already configured, ask user to add them:
+Create or update `.claude/settings.local.json` in the project directory with permissions for autonomous work:
 
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv:*)",
+      "Bash(python:*)",
+      "Bash(pip:*)",
+      "Bash(uvicorn:*)",
+      "Bash(mlflow:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(git:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(touch:*)",
+      "Bash(chmod:*)",
+      "Bash(which:*)",
+      "Bash(echo:*)",
+      "Bash(cd:*)",
+      "Bash(pwd:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(wc:*)",
+      "Bash(sort:*)",
+      "Bash(uniq:*)",
+      "Bash(tree:*)",
+      "WebFetch",
+      "WebSearch"
+    ],
+    "defaultMode": "acceptEdits"
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
+  }
+}
 ```
-To allow autonomous execution, please run:
 
-/permissions add "Bash(uv:*)" "Bash(uvicorn:*)" "Bash(mlflow:*)" "Bash(npm:*)" "Bash(curl:*)"
-```
+**Use the Write tool to create this file** at `.claude/settings.local.json` in the project directory.
+
+The `sandbox` setting provides safety guardrails while `autoAllowBashIfSandboxed` auto-approves bash commands within those guardrails - best of both worlds.
+
+Then tell the user:
+"I've configured permissions for autonomous execution. The sandbox is enabled for safety, but bash commands will auto-approve within safe boundaries. You shouldn't see permission prompts during my work."
 
 ### 2.3 Browser Automation (Optional)
 
@@ -128,13 +184,99 @@ When Playwright is enabled, you'll have access to MCP tools:
 - `mcp__playwright__browser_take_screenshot` - Capture screenshots
 - `mcp__playwright__browser_snapshot` - Get accessibility tree
 
-**Note**: The browser window is visible - the user can see what's happening and can intervene (e.g., to log in manually).
+#### Playwright Authentication Flow
 
-### 2.4 Get Explicit Go-Ahead
+If the demo requires logging into authenticated sites (Databricks, GitHub, etc.):
 
-After presenting the summary, wait for user confirmation before proceeding. This is the ONE exception to "don't ask for permission" - the user must explicitly approve the access summary before autonomous work begins.
+1. **I'll open the login page** - You'll see a browser window appear
+2. **You log in manually** - Use your credentials, SSO, 2FA as needed
+3. **Tell me when done** - Just say "logged in" or "ready"
+4. **I continue from there** - Session cookies persist, I can navigate freely
 
-## Phase 3: Set Up Project Structure
+**Important**: I will NEVER ask for your passwords or try to automate login. Authentication is always manual for security.
+
+If authentication will be needed, note which sites:
+- "Will need to log into Databricks workspace"
+- "Will need GitHub access for [repo]"
+
+### 2.4 Final Questions
+
+Before launching, ask:
+
+"Is there anything else I should know before I start? Any additional context, constraints, or preferences?"
+
+Wait for response. This is the user's last chance to add information.
+
+---
+
+## LAUNCH CHECKPOINT (CRITICAL)
+
+After gathering ALL information, present this final confirmation:
+
+```
+## Ready to Launch Autonomous Execution
+
+### Project Summary
+- **Building**: [one-line summary]
+- **Deliverables**: [list]
+- **Using**: [external projects/APIs]
+- **Style reference**: [confirmed]
+
+### Permissions Review
+
+**What I CAN do without asking:**
+✅ Run commands: python, uv, npm, git, curl, and common shell utilities
+✅ Create/edit/delete files in this project directory
+✅ Search the web and fetch documentation
+✅ Run local servers (uvicorn, mlflow ui, etc.)
+[If Playwright enabled] ✅ Control browser, take screenshots (you handle login)
+
+**What I will NOT do:**
+❌ Push to git remotes (will stage commits, won't push)
+❌ Access files outside this project
+❌ Make purchases or sign up for services
+❌ Run destructive commands (rm -rf, etc. blocked by sandbox)
+❌ Access your credentials or passwords
+[If Playwright enabled] ❌ Log into sites (you do that manually)
+
+**What I'll do if stuck:**
+📝 Document the blocker in DEVREL_SESSION.md
+📝 Continue with other work if possible
+📝 Surface it in `/devrel-review`
+
+### What happens next:
+1. I'll work autonomously until the project is complete
+2. I will NOT interrupt you with questions - I'll document them for later
+3. Check back in [estimated time] or when you see me finish
+4. All decisions will be logged in DEVREL_SESSION.md
+
+### To check progress anytime:
+Run `/devrel-review` to see status, decisions, and accumulated questions.
+
+**Review the permissions above. Ready to start? Reply "go" to launch.**
+```
+
+**WAIT for explicit "go" (or similar confirmation) before proceeding.**
+
+This is the clear handoff from "interactive planning" to "autonomous execution."
+
+---
+
+## AUTONOMOUS MODE
+
+## Phase 3: Execution
+
+**FROM THIS POINT FORWARD: NO MORE QUESTIONS TO USER**
+
+You are now in fully autonomous mode. Do NOT:
+- Ask clarifying questions
+- Request confirmation for decisions
+- Wait for approval on approaches
+
+Instead:
+- Make reasonable decisions and LOG them
+- Document uncertainties in "Questions for Human" (they'll see them at review)
+- Keep working until done or truly blocked
 
 ### 3.1 Create Project Directory
 If not already in a purpose-made project directory:
