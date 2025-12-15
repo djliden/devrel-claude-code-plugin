@@ -107,20 +107,21 @@ Or add to `.claude/settings.json`:
 
 ```
 devrel-claude-code-plugin/
-├── .claude-plugin/
-│   └── marketplace.json          # Marketplace manifest (at repo root)
-└── devrel-autonomy/              # The plugin
+└── devrel-marketplace/               # Marketplace directory (name must match marketplace.json "name")
     ├── .claude-plugin/
-    │   └── plugin.json
-    ├── agents/
-    │   ├── coder.md
-    │   ├── orchestrator.md
-    │   ├── reviewer.md
-    │   └── writer.md
-    └── commands/
-        ├── devrel-start.md
-        ├── devrel-expand.md
-        └── devrel-review.md
+    │   └── marketplace.json
+    └── devrel-autonomy/              # The plugin
+        ├── .claude-plugin/
+        │   └── plugin.json
+        ├── agents/
+        │   ├── coder.md
+        │   ├── orchestrator.md
+        │   ├── reviewer.md
+        │   └── writer.md
+        └── commands/
+            ├── devrel-start.md
+            ├── devrel-expand.md
+            └── devrel-review.md
 ```
 
 ## Example Usage
