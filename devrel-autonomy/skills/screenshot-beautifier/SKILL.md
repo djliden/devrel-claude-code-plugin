@@ -33,13 +33,16 @@ INPUT="screenshot.png"
 OUTPUT="screenshot_polished.png"
 RADIUS=10
 
+# Get dimensions
+WIDTH=$(identify -format '%w' "$INPUT")
+HEIGHT=$(identify -format '%h' "$INPUT")
+
+# Create rounded rectangle mask and apply with shadow
 convert "$INPUT" \
-  \( +clone -alpha extract \
-    -draw "fill black polygon 0,0 0,$RADIUS $RADIUS,0 fill white circle $RADIUS,$RADIUS $RADIUS,0" \
-    \( +clone -flip \) -compose Multiply -composite \
-    \( +clone -flop \) -compose Multiply -composite \
+  \( +clone -alpha extract -fill black -colorize 100% \
+    -fill white -draw "roundrectangle 0,0,$((WIDTH-1)),$((HEIGHT-1)),$RADIUS,$RADIUS" \
   \) -alpha off -compose CopyOpacity -composite \
-  -background none -gravity center -extent $(identify -format '%[fx:w+80]x%[fx:h+80]' "$INPUT") \
+  -background none -gravity center -extent $((WIDTH+80))x$((HEIGHT+80)) \
   \( +clone -background 'rgba(0,0,0,0.35)' -shadow 100x24+0+12 \) +swap \
   -background '#f0f0f0' -layers merge +repage \
   "$OUTPUT"
@@ -55,14 +58,16 @@ Or use the helper script:
 ```bash
 INPUT="screenshot.png"
 OUTPUT="screenshot_polished.png"
+RADIUS=12
+
+WIDTH=$(identify -format '%w' "$INPUT")
+HEIGHT=$(identify -format '%h' "$INPUT")
 
 convert "$INPUT" \
-  \( +clone -alpha extract \
-    -draw 'fill black polygon 0,0 0,12 12,0 fill white circle 12,12 12,0' \
-    \( +clone -flip \) -compose Multiply -composite \
-    \( +clone -flop \) -compose Multiply -composite \
+  \( +clone -alpha extract -fill black -colorize 100% \
+    -fill white -draw "roundrectangle 0,0,$((WIDTH-1)),$((HEIGHT-1)),$RADIUS,$RADIUS" \
   \) -alpha off -compose CopyOpacity -composite \
-  -background none -gravity center -extent $(identify -format '%[fx:w+60]x%[fx:h+60]' "$INPUT") \
+  -background none -gravity center -extent $((WIDTH+60))x$((HEIGHT+60)) \
   \( +clone -background black -shadow 60x8+0+4 \) +swap \
   -background white -layers merge +repage \
   "$OUTPUT"
@@ -73,19 +78,19 @@ convert "$INPUT" \
 ```bash
 INPUT="screenshot.png"
 OUTPUT="screenshot_gradient.png"
+RADIUS=12
+
 WIDTH=$(identify -format '%w' "$INPUT")
 HEIGHT=$(identify -format '%h' "$INPUT")
 BG_WIDTH=$((WIDTH + 120))
 BG_HEIGHT=$((HEIGHT + 120))
 
-# Create gradient background
+# Create gradient background with rounded screenshot
 convert -size ${BG_WIDTH}x${BG_HEIGHT} \
   gradient:'#667eea'-'#764ba2' \
   \( "$INPUT" \
-    \( +clone -alpha extract \
-      -draw 'fill black polygon 0,0 0,12 12,0 fill white circle 12,12 12,0' \
-      \( +clone -flip \) -compose Multiply -composite \
-      \( +clone -flop \) -compose Multiply -composite \
+    \( +clone -alpha extract -fill black -colorize 100% \
+      -fill white -draw "roundrectangle 0,0,$((WIDTH-1)),$((HEIGHT-1)),$RADIUS,$RADIUS" \
     \) -alpha off -compose CopyOpacity -composite \
     \( +clone -background black -shadow 80x12+0+8 \) +swap \
     -background none -layers merge +repage \
@@ -111,6 +116,8 @@ convert "$INPUT" \
 ```bash
 INPUT="screenshot.png"
 OUTPUT="screenshot_dark.png"
+RADIUS=10
+
 WIDTH=$(identify -format '%w' "$INPUT")
 HEIGHT=$(identify -format '%h' "$INPUT")
 BG_WIDTH=$((WIDTH + 100))
@@ -118,10 +125,8 @@ BG_HEIGHT=$((HEIGHT + 100))
 
 convert -size ${BG_WIDTH}x${BG_HEIGHT} xc:'#1a1a2e' \
   \( "$INPUT" \
-    \( +clone -alpha extract \
-      -draw 'fill black polygon 0,0 0,10 10,0 fill white circle 10,10 10,0' \
-      \( +clone -flip \) -compose Multiply -composite \
-      \( +clone -flop \) -compose Multiply -composite \
+    \( +clone -alpha extract -fill black -colorize 100% \
+      -fill white -draw "roundrectangle 0,0,$((WIDTH-1)),$((HEIGHT-1)),$RADIUS,$RADIUS" \
     \) -alpha off -compose CopyOpacity -composite \
     \( +clone -background '#4a00e0' -shadow 100x20+0+0 \) +swap \
     -background none -layers merge +repage \
@@ -147,7 +152,7 @@ done
 
 ## Parameters Explained
 
-- **Rounded corners**: The `-draw 'fill black polygon...'` creates corner masks
+- **Rounded corners**: The `roundrectangle` command draws a proper rounded rectangle mask (format: `x1,y1,x2,y2,rx,ry` where rx/ry are corner radii)
 - **Shadow**: `-shadow 60x8+0+4` = opacity 60%, blur 8px, offset x+0 y+4
 - **Padding**: `-extent` adds space around the image
 - **Background**: Final `-background` sets the canvas color
@@ -157,8 +162,9 @@ done
 | Want | Change |
 |------|--------|
 | Larger shadow | Increase blur: `-shadow 80x12+0+8` |
-| More padding | Increase extent: `%[fx:w+120]x%[fx:h+120]` |
-| Sharper corners | Reduce radius: change `12` to `8` in polygon/circle |
+| More padding | Increase extent values (e.g., `+120` instead of `+80`) |
+| Sharper corners | Reduce `RADIUS` value (e.g., `8` instead of `12`) |
+| Rounder corners | Increase `RADIUS` value (e.g., `20` instead of `12`) |
 | Different gradient | Change colors: `gradient:'#ff6b6b'-'#feca57'` |
 
 ## Integration with Playwright Screenshots
