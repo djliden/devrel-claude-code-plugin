@@ -159,7 +159,30 @@ mcp__playwright__browser_snapshot()
 
 The browser window is visible - useful for debugging and the user can intervene if needed (e.g., manual login).
 
-### 6. Polish for Demo
+### 6. Beautify Screenshots (ALWAYS DO THIS)
+
+**All screenshots for blog posts and documentation MUST be beautified.** Raw Playwright screenshots look unprofessional.
+
+Use the `screenshot-beautifier` skill to add the macOS window screenshot style (rounded corners, soft shadow):
+
+```bash
+# Check ImageMagick is installed
+which convert || echo "Install with: brew install imagemagick"
+
+# Default (macos style) - USE THIS
+./scripts/beautify.sh screenshots/raw/app.png macos screenshots/app.png
+
+# Other presets if needed: gradient, minimal, dark, white
+./scripts/beautify.sh screenshots/raw/app.png gradient screenshots/app.png
+```
+
+**Workflow:**
+1. Save raw Playwright screenshots to `screenshots/raw/`
+2. Beautify each one with the macos preset
+3. Save polished versions to `screenshots/`
+4. Reference only the polished versions in blog posts/docs
+
+### 7. Polish for Demo
 - Add clear section comments
 - Ensure outputs are visible and meaningful
 - Create a clean execution path

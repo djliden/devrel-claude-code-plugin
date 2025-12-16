@@ -126,6 +126,36 @@ The plugin uses specialized subagents for different tasks:
 | **reviewer** | QA check before human review - verifies code runs, content matches style |
 | **browser** | Playwright-based UI testing, screenshots, web interaction |
 
+## Screenshot Beautification
+
+The plugin includes a `screenshot-beautifier` skill that uses ImageMagick to polish raw screenshots with rounded corners, shadows, and gradient backgrounds.
+
+**Prerequisite:** Install ImageMagick
+```bash
+brew install imagemagick  # macOS
+apt-get install imagemagick  # Linux
+```
+
+**Usage via helper script:**
+```bash
+# Default (macos style)
+./scripts/beautify.sh screenshot.png
+
+# Or specify preset: macos, gradient, minimal, dark, white
+./scripts/beautify.sh screenshot.png gradient output.png
+```
+
+**Presets:**
+| Preset | Description |
+|--------|-------------|
+| `macos` | **(default)** macOS window style - rounded corners, soft shadow, light background |
+| `gradient` | Purple/blue gradient background, rounded corners, shadow |
+| `minimal` | Light gray background, subtle shadow |
+| `dark` | Dark background with purple glow |
+| `white` | Clean white background with shadow |
+
+The skill also includes detailed ImageMagick commands if you need custom styling. Claude will automatically use this skill when asked to beautify or polish screenshots.
+
 ## Browser Automation (Optional)
 
 For demos with web UIs, install the Playwright plugin:
@@ -155,10 +185,15 @@ devrel-claude-code-plugin/
     │   ├── orchestrator.md       # Workflow coordination
     │   ├── reviewer.md           # Quality assurance
     │   └── writer.md             # Content creation
-    └── commands/
-        ├── devrel-start.md
-        ├── devrel-expand.md
-        └── devrel-review.md
+    ├── commands/
+    │   ├── devrel-start.md
+    │   ├── devrel-expand.md
+    │   └── devrel-review.md
+    └── skills/
+        └── screenshot-beautifier/
+            ├── SKILL.md          # ImageMagick instructions
+            └── scripts/
+                └── beautify.sh   # Helper script with presets
 ```
 
 ## Example Usage
@@ -178,6 +213,64 @@ devrel-claude-code-plugin/
 # - Decision log
 # - Review checklist
 ```
+
+## Tips
+
+### Monitor the First Few Minutes
+
+After launching autonomous execution with "go", **stick around for 3-5 minutes**. Early permission prompts or configuration issues are most likely to appear at the start (cloning repos, installing dependencies, starting servers). Once the agent is past initial setup and working smoothly, it's safer to step away.
+
+### Restart After Permissions Setup
+
+Claude Code loads settings at startup. After the setup phase writes `.claude/settings.local.json`, you'll need to restart and `/resume` for the new permissions to take effect. The plugin will prompt you to do this.
+
+### Check `/devrel-review` Periodically
+
+Even during autonomous execution, you can run `/devrel-review` in another terminal (in the same project directory) to check progress, see decisions made, and catch any accumulated questions.
+
+### Advanced: Auto-Deny Hook for Fully Hands-Off Operation
+
+If you want Claude to automatically continue when hitting unexpected permission prompts (rather than waiting for you), you can set up an auto-deny hook. **Use with caution** - this means Claude will skip operations it can't perform rather than waiting for approval.
+
+Create a script `scripts/deny-and-continue.sh`:
+```bash
+#!/bin/bash
+cat <<EOF
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PermissionRequest",
+    "decision": {
+      "behavior": "deny",
+      "message": "User unavailable. Find another approach or document this blocker and continue with other work.",
+      "interrupt": false
+    }
+  }
+}
+EOF
+```
+
+Add to `.claude/settings.local.json`:
+```json
+{
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./scripts/deny-and-continue.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**To disable**: Remove the `hooks` section from settings.local.json.
+
+**Recommendation**: Only use this if you're comfortable debugging Claude Code issues. For most users, the default behavior (pause and wait for permission) is safer.
 
 ## License
 
