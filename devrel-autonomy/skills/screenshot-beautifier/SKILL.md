@@ -10,7 +10,7 @@ Transform raw screenshots into polished, professional images with rounded corner
 
 ## Prerequisites
 
-ImageMagick must be installed:
+ImageMagick 7 must be installed:
 ```bash
 # macOS
 brew install imagemagick
@@ -19,7 +19,7 @@ brew install imagemagick
 apt-get install imagemagick
 
 # Check installation
-convert --version
+magick --version
 ```
 
 ## Quick Beautification Commands
@@ -34,12 +34,12 @@ OUTPUT="screenshot_polished.png"
 RADIUS=10
 
 # Get dimensions
-WIDTH=$(identify -format '%w' "$INPUT")
-HEIGHT=$(identify -format '%h' "$INPUT")
+WIDTH=$(magick identify -format '%w' "$INPUT")
+HEIGHT=$(magick identify -format '%h' "$INPUT")
 
-# Create rounded rectangle mask and apply with shadow
-convert "$INPUT" \
-  \( +clone -alpha extract -fill black -colorize 100% \
+# Create mask from scratch (not from source alpha) and apply with shadow
+magick "$INPUT" -alpha set \
+  \( -size ${WIDTH}x${HEIGHT} xc:black \
     -fill white -draw "roundrectangle 0,0,$((WIDTH-1)),$((HEIGHT-1)),$RADIUS,$RADIUS" \
   \) -alpha off -compose CopyOpacity -composite \
   -background none -gravity center -extent $((WIDTH+80))x$((HEIGHT+80)) \
@@ -60,11 +60,11 @@ INPUT="screenshot.png"
 OUTPUT="screenshot_polished.png"
 RADIUS=12
 
-WIDTH=$(identify -format '%w' "$INPUT")
-HEIGHT=$(identify -format '%h' "$INPUT")
+WIDTH=$(magick identify -format '%w' "$INPUT")
+HEIGHT=$(magick identify -format '%h' "$INPUT")
 
-convert "$INPUT" \
-  \( +clone -alpha extract -fill black -colorize 100% \
+magick "$INPUT" -alpha set \
+  \( -size ${WIDTH}x${HEIGHT} xc:black \
     -fill white -draw "roundrectangle 0,0,$((WIDTH-1)),$((HEIGHT-1)),$RADIUS,$RADIUS" \
   \) -alpha off -compose CopyOpacity -composite \
   -background none -gravity center -extent $((WIDTH+60))x$((HEIGHT+60)) \
@@ -80,16 +80,16 @@ INPUT="screenshot.png"
 OUTPUT="screenshot_gradient.png"
 RADIUS=12
 
-WIDTH=$(identify -format '%w' "$INPUT")
-HEIGHT=$(identify -format '%h' "$INPUT")
+WIDTH=$(magick identify -format '%w' "$INPUT")
+HEIGHT=$(magick identify -format '%h' "$INPUT")
 BG_WIDTH=$((WIDTH + 120))
 BG_HEIGHT=$((HEIGHT + 120))
 
 # Create gradient background with rounded screenshot
-convert -size ${BG_WIDTH}x${BG_HEIGHT} \
+magick -size ${BG_WIDTH}x${BG_HEIGHT} \
   gradient:'#667eea'-'#764ba2' \
-  \( "$INPUT" \
-    \( +clone -alpha extract -fill black -colorize 100% \
+  \( "$INPUT" -alpha set \
+    \( -size ${WIDTH}x${HEIGHT} xc:black \
       -fill white -draw "roundrectangle 0,0,$((WIDTH-1)),$((HEIGHT-1)),$RADIUS,$RADIUS" \
     \) -alpha off -compose CopyOpacity -composite \
     \( +clone -background black -shadow 80x12+0+8 \) +swap \
@@ -98,14 +98,17 @@ convert -size ${BG_WIDTH}x${BG_HEIGHT} \
   "$OUTPUT"
 ```
 
-### Minimal: Light Gray Background + Subtle Shadow
+### Minimal: Light Gray Background + Subtle Shadow (No Rounded Corners)
 
 ```bash
 INPUT="screenshot.png"
 OUTPUT="screenshot_minimal.png"
 
-convert "$INPUT" \
-  -background none -gravity center -extent $(identify -format '%[fx:w+80]x%[fx:h+80]' "$INPUT") \
+WIDTH=$(magick identify -format '%w' "$INPUT")
+HEIGHT=$(magick identify -format '%h' "$INPUT")
+
+magick "$INPUT" \
+  -background none -gravity center -extent $((WIDTH+80))x$((HEIGHT+80)) \
   \( +clone -background 'rgba(0,0,0,0.15)' -shadow 40x6+0+3 \) +swap \
   -background '#f5f5f5' -layers merge +repage \
   "$OUTPUT"
@@ -118,14 +121,14 @@ INPUT="screenshot.png"
 OUTPUT="screenshot_dark.png"
 RADIUS=10
 
-WIDTH=$(identify -format '%w' "$INPUT")
-HEIGHT=$(identify -format '%h' "$INPUT")
+WIDTH=$(magick identify -format '%w' "$INPUT")
+HEIGHT=$(magick identify -format '%h' "$INPUT")
 BG_WIDTH=$((WIDTH + 100))
 BG_HEIGHT=$((HEIGHT + 100))
 
-convert -size ${BG_WIDTH}x${BG_HEIGHT} xc:'#1a1a2e' \
-  \( "$INPUT" \
-    \( +clone -alpha extract -fill black -colorize 100% \
+magick -size ${BG_WIDTH}x${BG_HEIGHT} xc:'#1a1a2e' \
+  \( "$INPUT" -alpha set \
+    \( -size ${WIDTH}x${HEIGHT} xc:black \
       -fill white -draw "roundrectangle 0,0,$((WIDTH-1)),$((HEIGHT-1)),$RADIUS,$RADIUS" \
     \) -alpha off -compose CopyOpacity -composite \
     \( +clone -background '#4a00e0' -shadow 100x20+0+0 \) +swap \
@@ -136,13 +139,15 @@ convert -size ${BG_WIDTH}x${BG_HEIGHT} xc:'#1a1a2e' \
 
 ## Batch Processing
 
-Process all screenshots in a directory:
+Process all screenshots in a directory (shadow only, no rounded corners):
 
 ```bash
 for img in screenshots/*.png; do
   OUTPUT="${img%.png}_polished.png"
-  convert "$img" \
-    -background none -gravity center -extent $(identify -format '%[fx:w+60]x%[fx:h+60]' "$img") \
+  WIDTH=$(magick identify -format '%w' "$img")
+  HEIGHT=$(magick identify -format '%h' "$img")
+  magick "$img" \
+    -background none -gravity center -extent $((WIDTH+60))x$((HEIGHT+60)) \
     \( +clone -background black -shadow 60x8+0+4 \) +swap \
     -background white -layers merge +repage \
     "$OUTPUT"
@@ -152,7 +157,8 @@ done
 
 ## Parameters Explained
 
-- **Rounded corners**: The `roundrectangle` command draws a proper rounded rectangle mask (format: `x1,y1,x2,y2,rx,ry` where rx/ry are corner radii)
+- **Rounded corners**: Create a black canvas with `-size WxH xc:black`, then draw a white `roundrectangle` mask (format: `x1,y1,x2,y2,rx,ry` where rx/ry are corner radii). Apply as alpha with `-compose CopyOpacity -composite`
+- **Alpha setup**: Use `-alpha set` on opaque PNGs (like Playwright screenshots) to ensure they have an alpha channel before applying the mask
 - **Shadow**: `-shadow 60x8+0+4` = opacity 60%, blur 8px, offset x+0 y+4
 - **Padding**: `-extent` adds space around the image
 - **Background**: Final `-background` sets the canvas color
@@ -176,9 +182,18 @@ After taking a screenshot with Playwright:
 # 2. Beautify it
 INPUT="screenshots/raw/mlflow-traces.png"
 OUTPUT="screenshots/mlflow-traces.png"
+RADIUS=10
 
-convert "$INPUT" \
-  [... beautification command ...]
+WIDTH=$(magick identify -format '%w' "$INPUT")
+HEIGHT=$(magick identify -format '%h' "$INPUT")
+
+magick "$INPUT" -alpha set \
+  \( -size ${WIDTH}x${HEIGHT} xc:black \
+    -fill white -draw "roundrectangle 0,0,$((WIDTH-1)),$((HEIGHT-1)),$RADIUS,$RADIUS" \
+  \) -alpha off -compose CopyOpacity -composite \
+  -background none -gravity center -extent $((WIDTH+80))x$((HEIGHT+80)) \
+  \( +clone -background 'rgba(0,0,0,0.35)' -shadow 100x24+0+12 \) +swap \
+  -background '#f0f0f0' -layers merge +repage \
   "$OUTPUT"
 
 # 3. Reference the beautified version in blog posts
@@ -187,7 +202,7 @@ convert "$INPUT" \
 
 ## Troubleshooting
 
-**"convert: command not found"**
+**"magick: command not found"**
 → Install ImageMagick: `brew install imagemagick`
 
 **Transparency not preserved**
@@ -195,3 +210,6 @@ convert "$INPUT" \
 
 **Image too large/small after processing**
 → Adjust the extent calculation or add explicit resize: `-resize 1200x`
+
+**White border appears around image / corners not rounded**
+→ Playwright screenshots are fully opaque PNGs. Don't extract alpha from the source; create the mask from scratch with `-size WxH xc:black` instead of `+clone -alpha extract`
