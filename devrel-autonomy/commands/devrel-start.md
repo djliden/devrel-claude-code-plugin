@@ -1,11 +1,11 @@
 ---
-description: Start a new DevRel demo project with autonomous execution
+description: Start or expand DevRel demo projects with autonomous execution
 allowed-tools: AskUserQuestion, Read, Write, Edit, Bash, Glob, Grep, Task, WebFetch, WebSearch, TodoWrite
 ---
 
 # DevRel Project Kickoff
 
-You are starting a new DevRel demo project. This process has two distinct modes:
+You are starting or expanding a DevRel demo project. This process has two distinct modes:
 
 1. **INTERACTIVE MODE** (Phases 1-2): You and the user plan together. Ask questions, clarify, gather info.
 2. **AUTONOMOUS MODE** (Phase 3+): You work independently. No questions - just execute and log decisions.
@@ -19,6 +19,21 @@ The transition between modes is explicit - user says "go" to launch autonomous e
 ## Phase 1: Gather Requirements
 
 Collect the following information through a natural conversation. Ask questions one at a time or in small groups. Do NOT use AskUserQuestion with prepopulated options for open-ended questions - just ask directly.
+
+### 1.0 Project Mode (ask FIRST)
+
+Use AskUserQuestion to determine the project mode:
+
+**Question**: "What would you like to do?"
+**Options**:
+- **New project**: Start a new demo from scratch
+- **Expand existing**: Transform existing content (code → blog, blog → video script, etc.)
+
+This determines which questions to ask next.
+
+---
+
+### IF NEW PROJECT MODE:
 
 ### Required Information (ask conversationally)
 
@@ -73,6 +88,36 @@ Collect the following information through a natural conversation. Ask questions 
 8. **Constraints**: Technologies to use/avoid, specific patterns
 9. **Audience**: Who is this for?
 10. **Narrative**: What is the core message, learning, goal, or set of messages the demo project is meant to communicate?
+
+---
+
+### IF EXPAND EXISTING MODE:
+
+### Required Information (ask conversationally)
+
+1. **Source material** (open-ended, ask directly):
+   - "What existing content do you want to expand? Provide a path to files or paste the content."
+   - Could be: code demo, blog post, notebook, documentation, etc.
+
+2. **Target format(s)** (use AskUserQuestion with multiSelect):
+   - Blog post
+   - Video script
+   - Runbook/guide
+   - Slides outline
+   - Code demo (if source is written content)
+
+3. **Writing sample** (open-ended, ask directly):
+   - "If the target format is different from the source, please share a sample of your writing in that format."
+   - "Or if the source already matches your style, just say 'use source style'."
+
+4. **Additional context** (open-ended, ask directly):
+   - "Any specific angle, audience, or constraints for the new format?"
+
+### Resource Scoping (if generating/testing code)
+5. **AI/LLM resources** (if applicable):
+   - "Will this expansion involve generating or testing code? If so, which API keys are available?"
+
+---
 
 ## Phase 2: Permissions Verification (CRITICAL)
 
@@ -396,8 +441,23 @@ Create the session tracking file with these sections:
 ```markdown
 # DevRel Session: [Project Name]
 
+## Project Mode
+[New Project / Expand Existing]
+
 ## Project Brief
 [User's description]
+
+## Source Material (EXPAND MODE ONLY)
+### Original Content
+[Path or inline excerpt]
+
+### Key Points to Preserve
+- [Main message]
+- [Technical details]
+- [Examples that must be included]
+
+### Adaptation Approach
+[How we're transforming the content]
 
 ## Target Artifacts
 - [ ] List of artifacts
@@ -577,6 +637,60 @@ The content reviewer will:
 - **Browser** can run in parallel with writer (after code is ready)
 - **Coder** and **writer** can work in parallel on independent artifacts
 - Never run content-reviewer until writer has drafts
+
+---
+
+## Source Analysis (EXPAND MODE ONLY)
+
+If expanding existing content, analyze the source material BEFORE spawning writer:
+
+1. **Read and understand** the source content thoroughly
+2. **Identify**:
+   - Key concepts and main message
+   - Technical details that must be preserved
+   - Flow and structure
+   - Examples and demonstrations
+   - Tone and voice (if written content)
+
+3. **Document in DEVREL_SESSION.md**:
+   - Source material summary
+   - Key points to preserve
+   - Adaptation approach
+
+This analysis goes in the writer prompt so they understand what to preserve.
+
+---
+
+## Adaptation Guidelines (EXPAND MODE)
+
+When spawning writer for format transformations, include these guidelines in the prompt:
+
+### Code → Blog
+- Lead with the problem/use case, not the solution
+- Show the "aha moment" early
+- Include code snippets with context
+- Explain *why* each step matters
+- End with next steps or extensions
+
+### Code → Video Script
+- Open with a hook (30 seconds)
+- Structure for visual demonstration
+- Include callouts for screen transitions
+- Write for speaking, not reading
+- Plan pauses for code execution
+
+### Content → Runbook
+- Prerequisites section
+- Step-by-step instructions
+- Expected outputs at each step
+- Troubleshooting section
+- Cleanup/teardown instructions
+
+### Content → Slides
+- One concept per slide
+- Minimal text, maximum visuals
+- Speaker notes with talking points
+- Clear narrative arc
 
 ---
 
