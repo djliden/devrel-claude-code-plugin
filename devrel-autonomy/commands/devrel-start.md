@@ -207,8 +207,15 @@ Create or update `.claude/settings.local.json` in the project directory with per
       "Bash(uniq:*)",
       "Bash(tree:*)",
       "Bash(pkill:*)",
+      "Bash(kill:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs:*)",
+      "Bash(rm:*)",
+      "Bash(timeout:*)",
       "Bash(pnpm:*)",
       "Bash(sleep:*)",
+      "Bash(pgrep:*)",
+      "Bash(ps:*)",
       "WebFetch",
       "WebSearch",
       "Read(/tmp/claude/**)"
@@ -225,7 +232,12 @@ Create or update `.claude/settings.local.json` in the project directory with per
       "streamlit",
       "gradio",
       "flask",
-      "fastapi"
+      "fastapi",
+      "lsof",
+      "pkill",
+      "kill",
+      "ps",
+      "pgrep"
     ]
   }
 }
@@ -283,20 +295,11 @@ To enable, run: `/plugin install playwright@claude-plugins-official`"
 
    Ask user: "Should I add Playwright permissions so browser automation runs without prompts?"
 
-   If yes, add these to the `permissions.allow` array:
+   If yes, add this to the `permissions.allow` array:
    ```json
-   "mcp__plugin_playwright_playwright__browser_navigate",
-   "mcp__plugin_playwright_playwright__browser_snapshot",
-   "mcp__plugin_playwright_playwright__browser_take_screenshot",
-   "mcp__plugin_playwright_playwright__browser_click",
-   "mcp__plugin_playwright_playwright__browser_type",
-   "mcp__plugin_playwright_playwright__browser_hover",
-   "mcp__plugin_playwright_playwright__browser_wait_for",
-   "mcp__plugin_playwright_playwright__browser_tabs",
-   "mcp__plugin_playwright_playwright__browser_close",
-   "mcp__plugin_playwright_playwright__browser_resize",
-   "mcp__plugin_playwright_playwright__browser_navigate_back"
+   "mcp__plugin_playwright_playwright__*"
    ```
+   This allows all Playwright browser tools (navigate, click, type, screenshot, etc.).
 
 2. **Restart Required Again** - If you added Playwright permissions, the user must restart Claude Code again for them to take effect. Tell them:
    ```
@@ -597,6 +600,33 @@ Spawn 2-3 writer agents in parallel with different approaches:
 - "Write with problem-first narrative"
 - "Write with story-driven approach"
 - "Write with quick-win scannable format"
+
+### Step 2.5: Handle Writer Feedback (if blocked)
+
+**Writers are empowered to exit with demands.** If a writer returns a `WRITER BLOCKED` report instead of content:
+
+1. **Parse the blocker type**: Code Issue, Screenshot Issue, or Missing Prerequisite
+2. **Route to the right agent**:
+   - Code issues → spawn `devrel-autonomy:coder` with the fix request
+   - Screenshot issues → spawn `devrel-autonomy:browser` with specific screenshot needs
+   - Prerequisites → resolve yourself or escalate to human
+3. **After resolution**: Spawn a NEW writer agent with:
+   - Original prompt
+   - Note that the blocker was resolved
+   - Path to fixed code/new screenshots
+
+**Example flow:**
+```
+Writer exits: "BLOCKED - Screenshot shows error dialog, need clean UI state"
+  ↓
+Orchestrator spawns browser: "Restart app, clear state, retake screenshot of main UI"
+  ↓
+Browser completes, new screenshot saved
+  ↓
+Orchestrator spawns new writer: "Previous writer was blocked on screenshot. Now resolved. Continue writing blog post..."
+```
+
+**Do not ask the writer to work around problems. Fix them.**
 
 ### Step 3: Quality Review (runs in parallel where possible)
 
