@@ -52,26 +52,27 @@ Collect the following information through a natural conversation. Ask questions 
    - Runbook/guide
    - Slides outline
 
-3. **Writing sample** (open-ended, ask directly):
+4. **Writing sample** (open-ended, ask directly):
    - "Please share a sample of your writing - paste text or provide a link to something you've published"
    - This is for matching their voice/style
 
 ### Resource Scoping (Critical - ask directly)
 
-4. **AI/LLM resources** - ask:
+5. **AI/LLM resources** - ask:
    - "Which API keys do you have available? (OpenAI, Anthropic, etc.)"
    - "Which model should I use for testing iterations? (e.g., gpt-4o-mini to save costs)"
    - "Any cost constraints I should know about?"
 
-5. **Databricks resources** (if applicable):
+6. **Databricks resources** (if applicable):
    - "Will this demo use Databricks? If so, which workspace/resources?"
 
-6. **Other external services**:
+7. **Other external services**:
    - "Any other APIs, databases, or services the demo needs?"
 
 ### Optional Information
-7. **Constraints**: Technologies to use/avoid, specific patterns
-8. **Audience**: Who is this for?
+8. **Constraints**: Technologies to use/avoid, specific patterns
+9. **Audience**: Who is this for?
+10. **Narrative**: What is the core message, learning, goal, or set of messages the demo project is meant to communicate?
 
 ## Phase 2: Permissions Verification (CRITICAL)
 
@@ -431,7 +432,14 @@ Create the session tracking file with these sections:
 - [Approach] - [Why] - [What we learned]
 
 ## Questions for Human
-[Accumulated questions grouped by theme]
+### Technical
+- [Questions about implementation, APIs, architecture]
+
+### Style/Content
+- [Questions about tone, structure, narrative]
+
+### Scope
+- [Questions about what to include/exclude]
 
 ## Review Checklist
 - [ ] Items for human review
@@ -477,8 +485,9 @@ Your role in this phase is to **coordinate**, not to code or write content direc
 ### What You DO NOT DO (Delegate These):
 ❌ **Writing or modifying code** → Spawn `devrel-autonomy:coder` agent
 ❌ **Writing blog posts, scripts, content** → Spawn `devrel-autonomy:writer` agent
-❌ **Quality review of artifacts** → Spawn `devrel-autonomy:reviewer` agent
-❌ **Browser automation, screenshots** → Spawn `devrel-autonomy:coder` agent (it has Playwright)
+❌ **Code quality review** → Spawn `devrel-autonomy:code-reviewer` agent
+❌ **Content quality review** → Spawn `devrel-autonomy:content-reviewer` agent
+❌ **Batch screenshots, UI testing** → Spawn `devrel-autonomy:browser` agent
 
 **If you catch yourself about to use Edit/Write on a .py, .ts, .js, or .md content file: STOP. Spawn a subagent instead.**
 
@@ -498,35 +507,76 @@ The coder agent will:
 - Clone repos, set up environment
 - Write/modify code
 - Test that it runs
-- Take screenshots if Playwright is needed
 - Return when code is working
 
-### Step 2: Content Creation (after code works)
+### Step 1.5: Screenshots & UI Testing (if applicable)
+After code is working and server is running:
+```
+Task tool call:
+- subagent_type: "devrel-autonomy:browser"
+- prompt: Include running app URL, list of screenshots needed, any authenticated sites
+```
+The browser agent will:
+- Navigate to the app
+- Take screenshots for documentation
+- Create `screenshots/README.md` manifest
+- Test key interactions
+- Handle auth handoff if needed
+
+**When to spawn browser vs let coder handle it:**
+- Spawn browser: Need 3+ screenshots, testing multiple flows, authenticated sites
+- Coder inline: Quick "does it load" check, single verification screenshot
+
+### Step 2: Content Creation (can start in parallel with code review)
 ```
 Task tool call:
 - subagent_type: "devrel-autonomy:writer"
-- prompt: Include working code location, style sample, target format (blog/video/etc), screenshots location
+- prompt: Include working code location, style sample, target format (blog/video/etc), screenshots/ directory and manifest
 ```
 Spawn 2-3 writer agents in parallel with different approaches:
 - "Write with problem-first narrative"
 - "Write with story-driven approach"
 - "Write with quick-win scannable format"
 
-### Step 3: Quality Review
+### Step 3: Quality Review (runs in parallel where possible)
+
+**3a. Code Review** (can start immediately after coder, in parallel with writer):
 ```
 Task tool call:
-- subagent_type: "devrel-autonomy:reviewer"
-- prompt: Include all artifact locations for review
+- subagent_type: "devrel-autonomy:code-reviewer"
+- prompt: Include code locations, what to test, demo quality expectations
 ```
-The reviewer will:
-- Verify code runs
-- Check content quality
-- Flag issues or approve
+The code reviewer will:
+- Verify code runs without errors
+- Check demo quality (simple, readable, educational)
+- Send back to coder if issues found
+
+**3b. Content Review** (after writer completes):
+```
+Task tool call:
+- subagent_type: "devrel-autonomy:content-reviewer"
+- prompt: Include content files, style sample, screenshots manifest
+```
+The content reviewer will:
+- Check style matches user's voice
+- Fact-check key claims
+- Verify narrative flow
+- Send back to writer if issues found
 
 ### Step 4: Compile Review Document (YOU do this)
 - Update DEVREL_SESSION.md with final status
 - Ensure all sections are complete
 - Start any servers/UIs for human to explore
+
+---
+
+## Parallelization Rules
+
+- **Code-reviewer** runs after coder completes, in parallel with writer
+- **Content-reviewer** runs after writer completes
+- **Browser** can run in parallel with writer (after code is ready)
+- **Coder** and **writer** can work in parallel on independent artifacts
+- Never run content-reviewer until writer has drafts
 
 ---
 
@@ -564,7 +614,9 @@ This is demo code, not production code:
 **Delegate via Task tool:**
 - All code development → devrel-autonomy:coder
 - All content writing → devrel-autonomy:writer
-- All quality review → devrel-autonomy:reviewer
+- Code quality review → devrel-autonomy:code-reviewer
+- Content quality review → devrel-autonomy:content-reviewer
+- Batch screenshots/UI testing → devrel-autonomy:browser
 
 ## When You're Done
 

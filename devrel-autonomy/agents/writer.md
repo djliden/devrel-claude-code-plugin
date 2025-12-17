@@ -43,8 +43,12 @@ Guidelines:
 - Explain *why* each step matters
 - Use code snippets with context around them
 - End with actionable next steps
+- Use rhetorical questions judiciously, if at all. They read like slop.
 
 ### Video Script
+
+Aim for a 10 minute script unless the user specifies otherwise.
+
 Structure:
 1. **Hook** (0:00-0:30) - Attention-grabbing opening
 2. **Overview** (0:30-1:30) - What we'll build/learn
