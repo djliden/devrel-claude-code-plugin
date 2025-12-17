@@ -97,6 +97,43 @@ Also:
 - Prefer `uv run mlflow ui` or `mlflow ui` over `.venv/bin/mlflow ui`
 - Use absolute paths when possible to avoid `cd` chains
 
+## Python Dependency Management
+
+**Always use `uv` for Python projects. Never manually write pyproject.toml with assumed versions.**
+
+### Setup New Project
+```bash
+uv init              # Creates pyproject.toml
+uv add package-name  # Adds dependency with correct version
+uv sync              # Installs all dependencies
+```
+
+### Adding Dependencies
+```bash
+# GOOD - uv resolves the correct version
+uv add pydantic-ai
+uv add mlflow>=2.0
+uv add "fastapi[standard]"
+
+# BAD - Don't manually write versions you're guessing
+# Don't do this:
+# [dependencies]
+# pydantic-ai = "^0.1.0"  # Wrong! You don't know the current version
+```
+
+### Why This Matters
+- Package versions change frequently
+- Manually assumed versions cause installation failures
+- `uv add` queries PyPI for the latest compatible version
+- The lockfile (`uv.lock`) ensures reproducibility
+
+### Running Code
+```bash
+uv run python script.py   # Runs with project dependencies
+uv run pytest             # Run tests
+uv run uvicorn main:app   # Run servers
+```
+
 ## Development Workflow
 
 ### 1. Understand the Demo Goal
