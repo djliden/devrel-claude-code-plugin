@@ -45,15 +45,12 @@ pnpm create vite@latest frontend --template react-ts
 cd frontend
 pnpm install
 
-# Add Tailwind (v4 syntax)
+# Add Tailwind v4 (uses Vite plugin, NOT tailwind.config.js)
 pnpm add tailwindcss @tailwindcss/vite
 # Replace src/index.css contents with: @import "tailwindcss";
 
-# Configure vite.config.ts for Tailwind plugin and path aliases
-# (see Shadcn docs for exact config)
-
-# Initialize Shadcn
-pnpm dlx shadcn@latest init
+# Initialize Shadcn (use explicit flags to avoid interactive prompts)
+pnpm dlx shadcn@latest init -y --base-color neutral
 
 cd ..
 
@@ -64,7 +61,28 @@ uv init
 uv add fastapi uvicorn pydantic
 ```
 
-### 2. Configure CORS (backend/main.py)
+### 2. Configure vite.config.ts (Tailwind v4)
+
+**IMPORTANT:** Tailwind v4 uses a Vite plugin. Do NOT create a `tailwind.config.js` file.
+
+```typescript
+// frontend/vite.config.ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+import path from 'path'
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+})
+```
+
+### 3. Configure CORS (backend/main.py)
 
 ```python
 from fastapi import FastAPI
@@ -80,6 +98,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 ```
+
+**Alternative: Vite Proxy (avoids CORS entirely)**
+
+Instead of CORS middleware, you can proxy API requests through Vite. Add to `vite.config.ts`:
+
+```typescript
+server: {
+  proxy: {
+    '/api': {
+      target: 'http://localhost:8000',
+      changeOrigin: true,
+      rewrite: (path) => path.replace(/^\/api/, ''),
+    },
+  },
+},
+```
+
+Then use `/api/analyze` instead of `http://localhost:8000/analyze` in your frontend fetch calls.
 
 ---
 
