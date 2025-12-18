@@ -37,20 +37,37 @@ mcp__playwright__browser_navigate(url="http://localhost:8000")
 # Wait for content to load
 mcp__playwright__browser_wait(selector=".main-content")
 
-# Take screenshot - you'll see the image
-mcp__playwright__browser_take_screenshot()
+# Take screenshot with explicit filename - ALWAYS specify the path
+mcp__playwright__browser_take_screenshot(filename="screenshots/main-dashboard.png")
 
 # Save observation: "Screenshot shows the main dashboard with..."
 ```
 
-#### IMPORTANT: Save Screenshots for Writer Agent
+#### CRITICAL: Specify Screenshot Paths
 
-Screenshots taken with Playwright are visible to you but need to be saved to files for the writer to use in blog posts/docs.
+**Always use the `filename` parameter** to save screenshots to predictable locations. Without it, screenshots go to temp files that the writer can't find.
 
-**After taking screenshots:**
-1. Create a `screenshots/` directory in the project
-2. Save each screenshot with a descriptive filename
-3. Document what each screenshot shows
+```
+# GOOD - Writer knows where to find these
+mcp__playwright__browser_take_screenshot(filename="screenshots/chat-ui.png")
+mcp__playwright__browser_take_screenshot(filename="screenshots/mlflow-traces.png")
+
+# BAD - Goes to temp file, writer can't reference
+mcp__playwright__browser_take_screenshot()
+```
+
+#### Setting Up Screenshot Directory
+
+**Before taking screenshots:**
+1. Create `screenshots/raw/` directory for original captures
+2. Create `screenshots/` directory for beautified versions
+3. Use descriptive filenames that match their purpose
+
+```bash
+mkdir -p screenshots/raw screenshots
+```
+
+**After taking screenshots, beautify them** (see section 6 in coder agent for beautify.sh usage).
 
 **Screenshot manifest** - Create `screenshots/README.md`:
 ```markdown

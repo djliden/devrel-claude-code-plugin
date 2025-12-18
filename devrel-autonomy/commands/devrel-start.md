@@ -573,15 +573,27 @@ The coder agent will:
 - Return when code is working
 
 ### Step 1.5: Screenshots & UI Testing (if applicable)
-After code is working and server is running:
+
+**⚠️ PRE-SCREENSHOT CHECK: If you or the coder modified any server code, you MUST restart the server first.**
+Servers serve old code until restarted. Screenshots of stale UIs waste everyone's time.
+
+```bash
+# Kill and restart before screenshots
+pkill -f "streamlit run" || true  # or uvicorn, etc.
+sleep 2
+uv run streamlit run app/main.py --server.port 8501 --server.headless true &
+sleep 3  # Wait for startup
+```
+
+After code is working and server is running (with fresh code):
 ```
 Task tool call:
 - subagent_type: "devrel-autonomy:browser"
-- prompt: Include running app URL, list of screenshots needed, any authenticated sites
+- prompt: Include running app URL, list of screenshots needed, any authenticated sites, and specify output paths for screenshots (e.g., "Save to screenshots/main-ui.png")
 ```
 The browser agent will:
 - Navigate to the app
-- Take screenshots for documentation
+- Take screenshots for documentation (saving to specified paths)
 - Create `screenshots/README.md` manifest
 - Test key interactions
 - Handle auth handoff if needed

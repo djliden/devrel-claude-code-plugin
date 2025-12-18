@@ -176,6 +176,33 @@ Remember: This is a demo, not a product. The goal is to show ONE concept clearly
 - Fix issues immediately
 - Document approaches that didn't work
 
+### 4.5 Restart Running Servers After Code Changes
+
+**If you modified code for a running server (Streamlit, FastAPI, uvicorn, etc.), you MUST restart it.**
+
+The server runs old code until restarted. Screenshots and tests will show stale behavior.
+
+```bash
+# Kill existing server (try in order until one works)
+pkill -f "streamlit run" || true
+lsof -ti:8501 | xargs kill -9 2>/dev/null || true
+
+# Wait for port to be released
+sleep 2
+
+# Restart with fresh code
+uv run streamlit run app/main.py --server.port 8501 --server.headless true
+```
+
+**Common ports:**
+- Streamlit: 8501
+- FastAPI/uvicorn: 8000
+- MLflow: 5000
+
+**Verify the restart worked:**
+1. Check the server responds: `curl -s http://localhost:PORT`
+2. If using Playwright, navigate and verify UI reflects your changes
+
 ### 5. Test Web UIs (if applicable)
 If the demo has a web interface and Playwright is enabled, use the MCP tools:
 
