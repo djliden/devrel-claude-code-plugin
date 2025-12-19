@@ -1,7 +1,7 @@
 {
   "name": "devrel-autonomy",
   "description": "Autonomous DevRel demo creation system. Enables Claude Code to develop demos, documentation, and content with minimal human supervision.",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "author": {
     "name": "Daniel Liden",
     "email": "daniel.liden@databricks.com"
