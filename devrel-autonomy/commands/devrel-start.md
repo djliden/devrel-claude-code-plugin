@@ -551,6 +551,7 @@ Your role in this phase is to **coordinate**, not to code or write content direc
 ❌ **Code quality review** → Spawn `devrel-autonomy:code-reviewer` agent
 ❌ **Content quality review** → Spawn `devrel-autonomy:content-reviewer` agent
 ❌ **Batch screenshots, UI testing** → Spawn `devrel-autonomy:browser` agent
+❌ **API/library research, doc lookups** → Spawn `devrel-autonomy:researcher` agent
 
 **If you catch yourself about to use Edit/Write on a .py, .ts, .js, or .md content file: STOP. Spawn a subagent instead.**
 
@@ -560,11 +561,32 @@ Your role in this phase is to **coordinate**, not to code or write content direc
 
 You MUST use the Task tool with the specialized agent types. Here's the workflow:
 
+### Step 0: Research (if using external libraries/APIs)
+
+**Before coding, research unfamiliar libraries or APIs.** Don't let the coder waste time guessing.
+
+```
+Task tool call:
+- subagent_type: "devrel-autonomy:researcher"
+- prompt: "How do I [specific question]? I need: working code pattern, key configuration, any gotchas."
+```
+
+The researcher returns a concise summary with code patterns and sources—not raw docs.
+
+**When to research first:**
+- Using a library/API for the first time
+- Integration between two systems (e.g., "PydanticAI + MLflow")
+- Unclear on correct configuration or patterns
+
+**When to skip:**
+- Well-known patterns (basic FastAPI, standard Python)
+- You already have working examples in the project
+
 ### Step 1: Code Development
 ```
 Task tool call:
 - subagent_type: "devrel-autonomy:coder"
-- prompt: Include project brief, resource constraints, what to build, any external project URLs
+- prompt: Include project brief, resource constraints, what to build, any external project URLs, AND any research findings from Step 0
 ```
 The coder agent will:
 - Clone repos, set up environment
@@ -768,6 +790,7 @@ This is demo code, not production code:
 - Write/Edit (ONLY for DEVREL_SESSION.md, CLAUDE.md, README.md)
 
 **Delegate via Task tool:**
+- API/library research → devrel-autonomy:researcher
 - All code development → devrel-autonomy:coder
 - All content writing → devrel-autonomy:writer
 - Code quality review → devrel-autonomy:code-reviewer

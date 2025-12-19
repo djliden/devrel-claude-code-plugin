@@ -73,29 +73,45 @@ def create_completion(prompt: str) -> str:
 
 ## Bash Command Guidelines
 
-**Compound commands (`&&`, `||`) are fine for most operations.** The sandbox auto-approves them when they stay within safe boundaries.
+**Compound commands (`&&`, `||`, `;`, `|`) trigger permission prompts when they contain sandbox-excluded commands.**
 
-**Exception: Server-starting commands should run separately.**
+The `excludedCommands` setting (lsof, pkill, kill, streamlit, uvicorn, etc.) only matches the **first** command in a chain. Anything chained after gets blocked by the sandbox.
 
-Commands that bind to ports (mlflow, uvicorn, streamlit, etc.) need to bypass the sandbox. The `excludedCommands` setting handles this, but only matches the first command in a chain.
+### ⚠️ CRITICAL: Run These Commands SEPARATELY
+
+**Process management and server commands must each be their own Bash call:**
 
 ```bash
-# FINE - normal compound commands work
+# BAD - will prompt for permission (lsof is first, but piped/chained)
+lsof -ti:8501 | xargs kill -9; sleep 2; uv run streamlit run app.py &
+
+# BAD - server command buried after semicolon
+cd /project && mlflow ui --port 5000
+
+# GOOD - separate Bash calls for each operation
+pkill -f "streamlit run" || true
+```
+```bash
+sleep 2
+```
+```bash
+uv run streamlit run app/main.py --server.port 8501 --server.headless true
+```
+
+### What Can Be Chained (safe compound commands)
+```bash
+# These are fine - no excluded commands
 cd /project && uv sync && python script.py
 git add . && git commit -m "message"
 mkdir -p foo/bar && touch foo/bar/file.txt
-
-# BAD - server command buried in chain, will prompt
-cd /project && mlflow ui --port 5000
-
-# GOOD - run server command separately
-cd /project
-mlflow ui --port 5000
 ```
 
-Also:
-- Prefer `uv run mlflow ui` or `mlflow ui` over `.venv/bin/mlflow ui`
-- Use absolute paths when possible to avoid `cd` chains
+### What Must Be Separate (one per Bash call)
+- `pkill`, `kill`, `lsof` - process management
+- `streamlit run`, `uvicorn`, `mlflow ui` - servers
+- `docker` commands
+
+**Rule of thumb:** If the command appears in `excludedCommands`, run it alone.
 
 ## Python Dependency Management
 
