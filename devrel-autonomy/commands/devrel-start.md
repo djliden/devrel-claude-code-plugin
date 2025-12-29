@@ -157,8 +157,9 @@ Does this look correct? Any changes before I start?
 
 ### 2.2 Configure Permissions for Autonomous Execution
 
-First, ask about any additional server tools:
+**Ask TWO questions before configuring:**
 
+**Question 1 - Server tools:**
 ```
 The default settings handle common tools (mlflow, uvicorn, streamlit, docker, etc.).
 
@@ -168,7 +169,20 @@ Examples: jupyter, tensorboard, vite, next, remix, rails, cargo, go run...
 List any additional tools, or say "none" to use defaults.
 ```
 
-Add any user-specified tools to the `excludedCommands` array in the settings below.
+**Question 2 - API hosts (CRITICAL for sandbox network access):**
+```
+The sandbox restricts network access. I need to know which external APIs this demo will call.
+
+Which API hosts will the demo connect to? Examples:
+- api.openai.com (OpenAI)
+- api.anthropic.com (Anthropic)
+- *.databricks.com (Databricks workspaces)
+- api.github.com (GitHub API)
+
+List the hostnames, or say "none" if purely local.
+```
+
+Add user-specified tools to `excludedCommands` and hosts to `network.allowedHosts` in the settings below.
 
 Create or update `.claude/settings.local.json` in the project directory with permissions for autonomous work:
 
@@ -181,6 +195,8 @@ Create or update `.claude/settings.local.json` in the project directory with per
       "Bash(pip:*)",
       "Bash(uvicorn:*)",
       "Bash(mlflow:*)",
+      "Bash(databricks:*)",
+      "Bash(dbai:*)",
       "Bash(npm:*)",
       "Bash(npx:*)",
       "Bash(node:*)",
@@ -233,12 +249,20 @@ Create or update `.claude/settings.local.json` in the project directory with per
       "gradio",
       "flask",
       "fastapi",
+      "databricks",
+      "dbai",
       "lsof",
       "pkill",
       "kill",
       "ps",
       "pgrep"
-    ]
+    ],
+    "network": {
+      "allowedHosts": [
+        "api.openai.com",
+        "api.anthropic.com"
+      ]
+    }
   }
 }
 ```
@@ -251,6 +275,9 @@ Create or update `.claude/settings.local.json` in the project directory with per
    - `enabled: true` - Enables OS-level sandboxing
    - `autoAllowBashIfSandboxed: true` - Auto-approves commands within sandbox boundaries
    - `excludedCommands` - Server tools that need to bypass sandbox (bind ports, etc.)
+   - `network.allowedHosts` - **CRITICAL**: API hosts the demo will call (sandbox blocks unlisted hosts!)
+
+**⚠️ NETWORK ACCESS**: If the user specified API hosts, ADD THEM to `allowedHosts`. Without this, API calls will fail silently or with auth errors after sandbox is enabled.
 
 After writing, read the file back to verify it was written correctly.
 
@@ -419,14 +446,48 @@ Create a `CLAUDE.md` file in the project root with project-specific instructions
 ```markdown
 # Project: [Project Name]
 
-## Subagent Usage (MANDATORY)
-This project uses specialized subagents. You MUST delegate work appropriately:
+## ⚠️ CRITICAL: You Are the ORCHESTRATOR
 
-- **For code development**: Use Task tool with prompt referencing `devrel-coder` agent
-- **For content writing**: Use Task tool with prompt referencing `devrel-writer` agent
-- **For quality review**: Use Task tool with prompt referencing `devrel-reviewer` agent
+You coordinate work. You do NOT write code or content directly.
 
-DO NOT do all work inline. Spawn subagents for their specialized tasks.
+### STOP Before Using Edit/Write
+If you're about to edit a `.py`, `.ts`, `.js`, or content `.md` file: **STOP. Spawn a subagent.**
+
+## Available Subagents (USE THESE)
+
+| Task | Subagent | When to Use |
+|------|----------|-------------|
+| Research APIs/libs | `devrel-autonomy:researcher` | Before coding unfamiliar libraries |
+| Write/modify code | `devrel-autonomy:coder` | ALL code changes |
+| Write content | `devrel-autonomy:writer` | Blog posts, scripts, guides |
+| Review code | `devrel-autonomy:code-reviewer` | After coder completes |
+| Review content | `devrel-autonomy:content-reviewer` | After writer completes |
+| Screenshots/UI | `devrel-autonomy:browser` | Multiple screenshots, UI testing |
+
+### How to Spawn
+```
+Task tool:
+- subagent_type: "devrel-autonomy:coder"
+- prompt: "Build X using Y. Resources: Z. Research findings: W."
+```
+
+## Bash Command Rules
+
+**Excluded commands (pkill, kill, lsof, streamlit, uvicorn, etc.) must run ALONE.**
+
+```bash
+# BAD - will prompt for permission
+lsof -ti:8501 | xargs kill; sleep 2; streamlit run app.py
+
+# GOOD - separate Bash calls
+pkill -f streamlit || true
+```
+```bash
+sleep 2
+```
+```bash
+uv run streamlit run app.py --server.port 8501
+```
 
 ## Resource Constraints
 - **Testing model**: [model specified by user, e.g., gpt-4o-mini]
@@ -436,6 +497,13 @@ DO NOT do all work inline. Spawn subagents for their specialized tasks.
 
 ## Project Context
 [Brief from user about what this demo does]
+
+## Workflow Reminder
+1. Research (if needed) → researcher
+2. Code → coder
+3. Screenshots → browser (after restarting server if code changed)
+4. Content → writer (spawn 2-3 with different approaches)
+5. Review → code-reviewer, content-reviewer
 ```
 
 ### 3.3 Create DEVREL_SESSION.md

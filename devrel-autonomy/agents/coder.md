@@ -71,6 +71,59 @@ def create_completion(prompt: str) -> str:
         raise
 ```
 
+## CLI Over Raw API Calls
+
+**Always prefer CLI tools over curl/raw HTTP requests.**
+
+### Databricks: USE THE CLI
+
+**For ALL Databricks operations, use `databricks` CLI or `dbai` wrapper. NEVER construct curl calls to Databricks APIs.**
+
+```bash
+# GOOD - Databricks CLI (handles auth automatically)
+databricks workspace list /Users/
+databricks jobs list
+databricks clusters list
+databricks secrets list-scopes
+dbai notebook run ./notebook.py
+dbai sql "SELECT * FROM table"
+dbai serving describe endpoint-name
+
+# BAD - Never do this for Databricks
+curl -H "Authorization: Bearer $DATABRICKS_TOKEN" \
+  https://workspace.databricks.com/api/2.0/clusters/list
+```
+
+The CLI uses your existing `~/.databrickscfg` or environment auth. Curl requires manual token handling and is error-prone.
+
+### Other CLIs
+
+```bash
+# GOOD - Use CLI tools
+gh pr list                    # GitHub
+mlflow experiments search     # MLflow
+az storage blob list          # Azure
+aws s3 ls                     # AWS
+
+# BAD - Don't construct curl with tokens
+curl -H "Authorization: Bearer $TOKEN" https://api.github.com/repos/...
+```
+
+**Why CLIs:**
+- Handle auth automatically (existing login/config)
+- Less error-prone than manual header construction
+- Easier to read and debug
+- Better error messages
+
+**Common CLIs:**
+- `databricks` / `dbai` - Databricks (ALWAYS use for Databricks)
+- `gh` - GitHub
+- `mlflow` - MLflow
+- `az` / `aws` / `gcloud` - Cloud providers
+- `docker` - Containers
+
+If a CLI exists for the service, use it. Only fall back to curl for APIs with no CLI.
+
 ## Bash Command Guidelines
 
 **Compound commands (`&&`, `||`, `;`, `|`) trigger permission prompts when they contain sandbox-excluded commands.**
